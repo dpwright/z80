@@ -16,7 +16,7 @@ library
                        Z80.Assembler,
                        Z80.Operations,
                        Z80.Operands
-  build-depends:       base >=4.7 && <4.8,
+  build-depends:       base >=4.6 && <4.9,
                        bytestring,
                        mtl
   hs-source-dirs:      src
