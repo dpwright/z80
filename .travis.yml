@@ -3,4 +3,3 @@ matrix:
   fast_finish: true
   include:
     - ghc: 7.8
-    - ghc: 7.6
