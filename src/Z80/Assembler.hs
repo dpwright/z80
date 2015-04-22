@@ -6,7 +6,7 @@ module Z80.Assembler
   , ASMBlock (..)
   , org
   , db
-  , label )where
+  , label ) where
 
 import Data.ByteString as BS
 
