@@ -98,9 +98,9 @@ instance (nn ~ Word16) => Load [nn] A where
 instance Load A I where
   ld A I = db $ pack [0xed, 0x57]
 instance Load I A where
-  ld I A = db $ pack [0xed, 0x5f]
+  ld I A = db $ pack [0xed, 0x47]
 instance Load A R where
-  ld A R = db $ pack [0xed, 0x47]
+  ld A R = db $ pack [0xed, 0x5f]
 instance Load R A where
   ld R A = db $ pack [0xed, 0x4f]
 
