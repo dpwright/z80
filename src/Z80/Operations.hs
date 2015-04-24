@@ -182,29 +182,3 @@ lo = fromIntegral
 derefError :: Show a => a -> b
 derefError x = error $ "Dereference syntax is a list with exactly one entry. Invalid: " ++ show x
 
-class Encodable r where
-  encode :: r -> Word8
-
-instance Encodable A where
-  encode A = 0x7 -- 111
-
-instance Encodable Reg8 where
-  encode B = 0x0 -- 000
-  encode C = 0x1 -- 001
-  encode D = 0x2 -- 010
-  encode E = 0x3 -- 011
-  encode H = 0x4 -- 100
-  encode L = 0x5 -- 101
-
-instance Encodable Reg16 where
-  encode BC = 0x0 -- 00
-  encode DE = 0x1 -- 01
-instance Encodable HL where
-  encode HL = 0x2 -- 10
-
--- SP and AF both encode to the same value.
--- This will break if there is ever a situation in which either could be passed.
-instance Encodable SP where
-  encode SP = 0x3 -- 11
-instance Encodable AF where
-  encode AF = 0x3 -- 11
