@@ -22,12 +22,14 @@ module Z80.Operations
   , cpdr
   ) where
 
-import Data.Bits
+import Data.Bits hiding (xor)
 import Data.Word
 import Data.ByteString
 
 import Z80.Assembler
 import Z80.Operands
+
+import Prelude hiding (and, or)
 
 class Load tgt src where
   ld :: tgt -> src -> Z80ASM

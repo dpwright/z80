@@ -6,6 +6,8 @@ import Data.Word
 
 import Z80
 
+import Prelude hiding (and, or)
+
 ($?=) :: Z80ASM -> [Word8] -> Assertion
 asm $?= bytes = extractBytes asm @?= pack bytes
   where extractBytes = asmData . org 0
