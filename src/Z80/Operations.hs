@@ -237,6 +237,8 @@ cpd = db $ pack [0xed, 0xa9]
 cpdr :: Z80ASM
 cpdr = db $ pack [0xed, 0xb9]
 
+{- -------- INTERNAL UTILITIES -------- -}
+
 (.<.) :: Bits a => a -> Int -> a
 (.<.) = shiftL
 
