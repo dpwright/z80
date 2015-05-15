@@ -7,6 +7,8 @@ module Z80.Operands
   , A (..), F (..), I (..), R (..)
   , BC (..), DE (..), HL (..)
   , AF (..), SP (..), PC (..)
+    -- * Shadow Registers
+  , AF' (..)
     -- * Index Registers & Offsets
   , RegIx (..)
   , IxOffset (..)
@@ -32,6 +34,8 @@ data HL = HL deriving (Eq, Show)
 data AF = AF deriving (Eq, Show)
 data SP = SP deriving (Eq, Show)
 data PC = PC deriving (Eq, Show)
+
+data AF' = AF' deriving (Eq, Show)
 
 data IxOffset = RegIx :+ Word8 deriving (Eq, Show)
 
