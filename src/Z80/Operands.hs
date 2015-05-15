@@ -1,11 +1,12 @@
 module Z80.Operands
   ( -- * Generic Registers
     Reg8 (..)
-  , Reg16 (..)
+  , Reg16
   , Encodable (..)
     -- * Special Registers
   , A (..), F (..), I (..), R (..)
-  , HL (..), AF (..), SP (..), PC (..)
+  , BC (..), DE (..), HL (..)
+  , AF (..), SP (..), PC (..)
     -- * Index Registers & Offsets
   , RegIx (..)
   , IxOffset (..)
@@ -16,7 +17,6 @@ module Z80.Operands
 import Data.Word
 
 data Reg8  = B | C | D | E | H | L deriving (Eq, Show)
-data Reg16 = BC | DE deriving (Eq, Show)
 data RegIx = IX | IY deriving (Eq, Show)
 
 -- Separating A from the other 8-bit registers allows me to define
@@ -26,6 +26,8 @@ data A  = A deriving (Eq, Show)
 data F  = F deriving (Eq, Show)
 data I  = I deriving (Eq, Show)
 data R  = R deriving (Eq, Show)
+data BC = BC deriving (Eq, Show)
+data DE = DE deriving (Eq, Show)
 data HL = HL deriving (Eq, Show)
 data AF = AF deriving (Eq, Show)
 data SP = SP deriving (Eq, Show)
@@ -49,8 +51,9 @@ instance Encodable Reg8 where
   encode H = 0x4 -- 100
   encode L = 0x5 -- 101
 
-instance Encodable Reg16 where
+instance Encodable BC where
   encode BC = 0x0 -- 00
+instance Encodable DE where
   encode DE = 0x1 -- 01
 instance Encodable HL where
   encode HL = 0x2 -- 10
@@ -61,3 +64,7 @@ instance Encodable SP where
   encode SP = 0x3 -- 11
 instance Encodable AF where
   encode AF = 0x3 -- 11
+
+class Encodable r => Reg16 r
+instance Reg16 BC
+instance Reg16 DE

@@ -80,12 +80,16 @@ instance (n ~ Word8) => Load [IxOffset] n where
     pack [0xfd, 0x36, ofst, n]
   ld x _ = derefError x
 
-instance Load A [Reg16] where
+instance Load A [BC] where
   ld A [BC] = db $ pack [0x0a]
+  ld _ x = derefError x
+instance Load A [DE] where
   ld A [DE] = db $ pack [0x1a]
   ld _ x = derefError x
-instance Load [Reg16] A where
+instance Load [BC] A where
   ld [BC] A = db $ pack [0x02]
+  ld x _ = derefError x
+instance Load [DE] A where
   ld [DE] A = db $ pack [0x12]
   ld x _ = derefError x
 
@@ -105,7 +109,7 @@ instance Load A R where
 instance Load R A where
   ld R A = db $ pack [0xed, 0x4f]
 
-instance (nn ~ Word16) => Load Reg16 nn where
+instance (Reg16 dd, nn ~ Word16) => Load dd nn where
   ld dd nn = db $ pack [encode dd .<. 4 .|. 0x01, lo nn, hi nn]
 instance (nn ~ Word16) => Load HL nn where
   ld dd nn = db $ pack [encode dd .<. 4 .|. 0x01, lo nn, hi nn]
@@ -125,13 +129,13 @@ instance (nn ~ Word16) => Load [nn] HL where
 
 -- NOTE Z80 documentation says you should be able to pass HL here, but that
 --      seems to clash with the previous instance, which is HL-specific?
-instance (nn ~ Word16) => Load Reg16 [nn] where
+instance (Reg16 dd, nn ~ Word16) => Load dd [nn] where
   ld dd [nn] = db $ pack [0xed, 0x01 .<. 6 .|. encode dd .<. 4 .|. 0xb, lo nn, hi nn]
   ld _ x = derefError x
 instance (nn ~ Word16) => Load SP [nn] where
   ld dd [nn] = db $ pack [0xed, 0x01 .<. 6 .|. encode dd .<. 4 .|. 0xb, lo nn, hi nn]
   ld _ x = derefError x
-instance (nn ~ Word16) => Load [nn] Reg16 where
+instance (Reg16 dd, nn ~ Word16) => Load [nn] dd where
   ld [nn] dd = db $ pack [0xed, 0x01 .<. 6 .|. encode dd .<. 4 .|. 0x3, lo nn, hi nn]
   ld x _ = derefError x
 instance (nn ~ Word16) => Load [nn] SP where
@@ -154,11 +158,13 @@ instance Load SP RegIx where
   ld SP IX = db $ pack [0xdd, 0xf9]
   ld SP IY = db $ pack [0xfd, 0xf9]
 
+
+
 class Stack reg where
   push :: reg -> Z80ASM
   pop  :: reg -> Z80ASM
 
-instance Stack Reg16 where
+instance (Reg16 qq) => Stack qq where
   push qq = db $ pack [0x3 .<. 6 .|. encode qq .<. 4 .|. 0x5]
   pop  qq = db $ pack [0x3 .<. 6 .|. encode qq .<. 4 .|. 0x1]
 instance Stack HL where
