@@ -9,6 +9,17 @@ module Z80.Operations
     ld
   , push
   , pop
+    -- * Exchange, Block Transfer, and Search Group
+  , ex
+  , exx
+  , ldi
+  , ldir
+  , ldd
+  , lddr
+  , cpi
+  , cpir
+  , cpd
+  , cpdr
   ) where
 
 import Data.Bits
@@ -178,6 +189,53 @@ instance Stack RegIx where
   push IY = db $ pack [0xfd, 0xe5]
   pop  IX = db $ pack [0xdd, 0xe1]
   pop  IY = db $ pack [0xfd, 0xe1]
+
+
+
+class Exchange reg reg' where
+  ex :: reg -> reg' -> Z80ASM
+
+instance Exchange DE HL where
+  ex DE HL = db $ pack [0xeb]
+
+instance Exchange AF AF' where
+  ex AF AF' = db $ pack [0x08]
+
+instance Exchange [SP] HL where
+  ex [SP] HL = db $ pack [0xe3]
+  ex x    _  = derefError x
+
+instance Exchange [SP] RegIx where
+  ex [SP] IX = db $ pack [0xdd, 0xe3]
+  ex [SP] IY = db $ pack [0xfd, 0xe3]
+  ex x    _  = derefError x
+
+exx :: Z80ASM
+exx = db $ pack [0xd9]
+
+ldi :: Z80ASM
+ldi = db $ pack [0xed, 0xa0]
+
+ldir :: Z80ASM
+ldir = db $ pack [0xed, 0xb0]
+
+ldd :: Z80ASM
+ldd = db $ pack [0xed, 0xa8]
+
+lddr :: Z80ASM
+lddr = db $ pack [0xed, 0xb8]
+
+cpi :: Z80ASM
+cpi = db $ pack [0xed, 0xa1]
+
+cpir :: Z80ASM
+cpir = db $ pack [0xed, 0xb1]
+
+cpd :: Z80ASM
+cpd = db $ pack [0xed, 0xa9]
+
+cpdr :: Z80ASM
+cpdr = db $ pack [0xed, 0xb9]
 
 (.<.) :: Bits a => a -> Int -> a
 (.<.) = shiftL
