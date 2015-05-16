@@ -29,6 +29,8 @@ module Z80.Operations
   , or
   , xor
   , cp
+  , inc
+  , dec
   ) where
 
 import Data.Bits hiding (xor)
@@ -333,6 +335,32 @@ instance Arithmetic [IxOffset] where
   cp    [IX :+ d] = db $ pack [0xdd, 0xbe, d]
   cp    [IY :+ d] = db $ pack [0xfd, 0xbe, d]
   cp    x         = derefError x
+
+class Inc operand where
+  inc :: operand -> Z80ASM
+  dec :: operand -> Z80ASM
+
+instance Inc A where
+  inc r = db $ pack [encode r .<. 3 .|. 0x4]
+  dec r = db $ pack [encode r .<. 3 .|. 0x5]
+
+instance Inc Reg8 where
+  inc r = db $ pack [encode r .<. 3 .|. 0x4]
+  dec r = db $ pack [encode r .<. 3 .|. 0x5]
+
+instance Inc [HL] where
+  inc [HL] = db $ pack [0x34]
+  inc x    = derefError x
+  dec [HL] = db $ pack [0x35]
+  dec x    = derefError x
+
+instance Inc [IxOffset] where
+  inc [IX :+ d] = db $ pack [0xdd, 0x34, d]
+  inc [IY :+ d] = db $ pack [0xfd, 0x34, d]
+  inc x         = derefError x
+  dec [IX :+ d] = db $ pack [0xdd, 0x35, d]
+  dec [IY :+ d] = db $ pack [0xfd, 0x35, d]
+  dec x         = derefError x
 
 {- -------- INTERNAL UTILITIES -------- -}
 
