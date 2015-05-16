@@ -31,6 +31,17 @@ module Z80.Operations
   , cp
   , inc
   , dec
+    -- * General-Purpose Arithmetic and CPU Control Groups
+  , daa
+  , cpl
+  , neg
+  , ccf
+  , scf
+  , nop
+  , halt
+  , di
+  , ei
+  , im
   ) where
 
 import Data.Bits hiding (xor)
@@ -361,6 +372,41 @@ instance Inc [IxOffset] where
   dec [IX :+ d] = db $ pack [0xdd, 0x35, d]
   dec [IY :+ d] = db $ pack [0xfd, 0x35, d]
   dec x         = derefError x
+
+
+
+daa :: Z80ASM
+daa = db $ pack [0x27]
+
+cpl :: Z80ASM
+cpl = db $ pack [0x2f]
+
+neg :: Z80ASM
+neg = db $ pack [0xed, 0x44]
+
+ccf :: Z80ASM
+ccf = db $ pack [0x3f]
+
+scf :: Z80ASM
+scf = db $ pack [0x37]
+
+nop :: Z80ASM
+nop = db $ pack [0x00]
+
+halt :: Z80ASM
+halt = db $ pack [0x76]
+
+di :: Z80ASM
+di = db $ pack [0xf3]
+
+ei :: Z80ASM
+ei = db $ pack [0xfb]
+
+im :: Word8 -> Z80ASM
+im 0 = db $ pack [0xed, 0x46]
+im 1 = db $ pack [0xed, 0x56]
+im 2 = db $ pack [0xed, 0x5e]
+im x = error $ "Invalid interrupt mode: " ++ show x
 
 {- -------- INTERNAL UTILITIES -------- -}
 
