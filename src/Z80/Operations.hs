@@ -21,10 +21,7 @@ module Z80.Operations
   , cpd
   , cpdr
     -- * 8-Bit Arithmetic Group
-  , add
-  , adc
   , sub
-  , sbc
   , and
   , or
   , xor
@@ -42,6 +39,10 @@ module Z80.Operations
   , di
   , ei
   , im
+    -- * 8-Bit / 16-Bit Arithmetic Group
+  , add
+  , adc
+  , sbc
   ) where
 
 import Data.Bits hiding (xor)
@@ -263,55 +264,37 @@ cpdr = db $ pack [0xed, 0xb9]
 
 
 
-class Arithmetic operand where
-  add :: A -> operand -> Z80ASM
-  adc :: A -> operand -> Z80ASM
-  sub ::      operand -> Z80ASM
-  sbc :: A -> operand -> Z80ASM
-  and ::      operand -> Z80ASM
-  or  ::      operand -> Z80ASM
-  xor ::      operand -> Z80ASM
-  cp  ::      operand -> Z80ASM
+class Arithmetic8 operand where
+  sub :: operand -> Z80ASM
+  and :: operand -> Z80ASM
+  or  :: operand -> Z80ASM
+  xor :: operand -> Z80ASM
+  cp  :: operand -> Z80ASM
 
-instance Arithmetic A where
-  add A r = db $ pack [0x1 .<. 7 .|. encode r]
-  adc A r = db $ pack [0x1 .<. 7 .|. 0x1 .<. 3 .|. encode r]
+instance Arithmetic8 A where
   sub   r = db $ pack [0x1 .<. 7 .|. 0x2 .<. 3 .|. encode r]
-  sbc A r = db $ pack [0x1 .<. 7 .|. 0x3 .<. 3 .|. encode r]
   and   r = db $ pack [0x1 .<. 7 .|. 0x4 .<. 3 .|. encode r]
   or    r = db $ pack [0x1 .<. 7 .|. 0x6 .<. 3 .|. encode r]
   xor   r = db $ pack [0x1 .<. 7 .|. 0x5 .<. 3 .|. encode r]
   cp    r = db $ pack [0x1 .<. 7 .|. 0x7 .<. 3 .|. encode r]
 
-instance Arithmetic Reg8 where
-  add A r = db $ pack [0x1 .<. 7 .|. encode r]
-  adc A r = db $ pack [0x1 .<. 7 .|. 0x1 .<. 3 .|. encode r]
+instance Arithmetic8 Reg8 where
   sub   r = db $ pack [0x1 .<. 7 .|. 0x2 .<. 3 .|. encode r]
-  sbc A r = db $ pack [0x1 .<. 7 .|. 0x3 .<. 3 .|. encode r]
   and   r = db $ pack [0x1 .<. 7 .|. 0x4 .<. 3 .|. encode r]
   or    r = db $ pack [0x1 .<. 7 .|. 0x6 .<. 3 .|. encode r]
   xor   r = db $ pack [0x1 .<. 7 .|. 0x5 .<. 3 .|. encode r]
   cp    r = db $ pack [0x1 .<. 7 .|. 0x7 .<. 3 .|. encode r]
 
-instance (n ~ Word8) => Arithmetic n where
-  add A n = db $ pack [0xc6, n]
-  adc A n = db $ pack [0xce, n]
+instance (n ~ Word8) => Arithmetic8 n where
   sub   n = db $ pack [0xd6, n]
-  sbc A n = db $ pack [0xde, n]
   and   n = db $ pack [0xe6, n]
   or    n = db $ pack [0xf6, n]
   xor   n = db $ pack [0xee, n]
   cp    n = db $ pack [0xfe, n]
 
-instance Arithmetic [HL] where
-  add A [HL] = db $ pack [0x86]
-  add A x    = derefError x
-  adc A [HL] = db $ pack [0x8e]
-  adc A x    = derefError x
+instance Arithmetic8 [HL] where
   sub   [HL] = db $ pack [0x96]
   sub   x    = derefError x
-  sbc A [HL] = db $ pack [0x9e]
-  sbc A x    = derefError x
   and   [HL] = db $ pack [0xa6]
   and   x    = derefError x
   or    [HL] = db $ pack [0xb6]
@@ -321,19 +304,10 @@ instance Arithmetic [HL] where
   cp    [HL] = db $ pack [0xbe]
   cp    x    = derefError x
 
-instance Arithmetic [IxOffset] where
-  add A [IX :+ d] = db $ pack [0xdd, 0x86, d]
-  add A [IY :+ d] = db $ pack [0xfd, 0x86, d]
-  add A x         = derefError x
-  adc A [IX :+ d] = db $ pack [0xdd, 0x8e, d]
-  adc A [IY :+ d] = db $ pack [0xfd, 0x8e, d]
-  adc A x         = derefError x
+instance Arithmetic8 [IxOffset] where
   sub   [IX :+ d] = db $ pack [0xdd, 0x96, d]
   sub   [IY :+ d] = db $ pack [0xfd, 0x96, d]
   sub   x         = derefError x
-  sbc A [IX :+ d] = db $ pack [0xdd, 0x9e, d]
-  sbc A [IY :+ d] = db $ pack [0xfd, 0x9e, d]
-  sbc A x         = derefError x
   and   [IX :+ d] = db $ pack [0xdd, 0xa6, d]
   and   [IY :+ d] = db $ pack [0xfd, 0xa6, d]
   and   x         = derefError x
@@ -407,6 +381,47 @@ im 0 = db $ pack [0xed, 0x46]
 im 1 = db $ pack [0xed, 0x56]
 im 2 = db $ pack [0xed, 0x5e]
 im x = error $ "Invalid interrupt mode: " ++ show x
+
+
+
+class Arithmetic target operand where
+  add :: target -> operand -> Z80ASM
+  adc :: target -> operand -> Z80ASM
+  sbc :: target -> operand -> Z80ASM
+
+instance Arithmetic A A where
+  add A r = db $ pack [0x1 .<. 7 .|. encode r]
+  adc A r = db $ pack [0x1 .<. 7 .|. 0x1 .<. 3 .|. encode r]
+  sbc A r = db $ pack [0x1 .<. 7 .|. 0x3 .<. 3 .|. encode r]
+
+instance Arithmetic A Reg8 where
+  add A r = db $ pack [0x1 .<. 7 .|. encode r]
+  adc A r = db $ pack [0x1 .<. 7 .|. 0x1 .<. 3 .|. encode r]
+  sbc A r = db $ pack [0x1 .<. 7 .|. 0x3 .<. 3 .|. encode r]
+
+instance (n ~ Word8) => Arithmetic A n where
+  add A n = db $ pack [0xc6, n]
+  adc A n = db $ pack [0xce, n]
+  sbc A n = db $ pack [0xde, n]
+
+instance Arithmetic A [HL] where
+  add A [HL] = db $ pack [0x86]
+  add A x    = derefError x
+  adc A [HL] = db $ pack [0x8e]
+  adc A x    = derefError x
+  sbc A [HL] = db $ pack [0x9e]
+  sbc A x    = derefError x
+
+instance Arithmetic A [IxOffset] where
+  add A [IX :+ d] = db $ pack [0xdd, 0x86, d]
+  add A [IY :+ d] = db $ pack [0xfd, 0x86, d]
+  add A x         = derefError x
+  adc A [IX :+ d] = db $ pack [0xdd, 0x8e, d]
+  adc A [IY :+ d] = db $ pack [0xfd, 0x8e, d]
+  adc A x         = derefError x
+  sbc A [IX :+ d] = db $ pack [0xdd, 0x9e, d]
+  sbc A [IY :+ d] = db $ pack [0xfd, 0x9e, d]
+  sbc A x         = derefError x
 
 {- -------- INTERNAL UTILITIES -------- -}
 
