@@ -99,34 +99,34 @@ instance (n ~ Word8) => Load [HL] n where
   ld [HL] n = db $ pack [0x36, n]
   ld x _ = derefError x
 
-instance Load Reg8 [IxOffset] where
-  ld r [IX :+ ofst] = db $
+instance Load Reg8 [RegIx] where
+  ld r [Just IX :+ ofst] = db $
     pack [0xdd, 1 .<. 6 .|. encode r .<. 3 .|. 6, ofst]
-  ld r [IY :+ ofst] = db $
+  ld r [Just IY :+ ofst] = db $
     pack [0xfd, 1 .<. 6 .|. encode r .<. 3 .|. 6, ofst]
   ld _ x = derefError x
-instance Load A [IxOffset] where
-  ld r [IX :+ ofst] = db $
+instance Load A [RegIx] where
+  ld r [Just IX :+ ofst] = db $
     pack [0xdd, 1 .<. 6 .|. encode r .<. 3 .|. 6, ofst]
-  ld r [IY :+ ofst] = db $
+  ld r [Just IY :+ ofst] = db $
     pack [0xfd, 1 .<. 6 .|. encode r .<. 3 .|. 6, ofst]
   ld _ x = derefError x
-instance Load [IxOffset] Reg8 where
-  ld [IX :+ ofst] r = db $
+instance Load [RegIx] Reg8 where
+  ld [Just IX :+ ofst] r = db $
     pack [0xdd, 1 .<. 6 .|. 6 .<. 3 .|. encode r, ofst]
-  ld [IY :+ ofst] r = db $
+  ld [Just IY :+ ofst] r = db $
     pack [0xfd, 1 .<. 6 .|. 6 .<. 3 .|. encode r, ofst]
   ld x _ = derefError x
-instance Load [IxOffset] A where
-  ld [IX :+ ofst] r = db $
+instance Load [RegIx] A where
+  ld [Just IX :+ ofst] r = db $
     pack [0xdd, 1 .<. 6 .|. 6 .<. 3 .|. encode r, ofst]
-  ld [IY :+ ofst] r = db $
+  ld [Just IY :+ ofst] r = db $
     pack [0xfd, 1 .<. 6 .|. 6 .<. 3 .|. encode r, ofst]
   ld x _ = derefError x
-instance (n ~ Word8) => Load [IxOffset] n where
-  ld [IX :+ ofst] n = db $
+instance (n ~ Word8) => Load [RegIx] n where
+  ld [Just IX :+ ofst] n = db $
     pack [0xdd, 0x36, ofst, n]
-  ld [IY :+ ofst] n = db $
+  ld [Just IY :+ ofst] n = db $
     pack [0xfd, 0x36, ofst, n]
   ld x _ = derefError x
 
@@ -169,6 +169,7 @@ instance (nn ~ Word16) => Load SP nn where
 instance (nn ~ Word16) => Load RegIx nn where
   ld IX nn = db $ pack [0xdd, 0x21, lo nn, hi nn]
   ld IY nn = db $ pack [0xfd, 0x21, lo nn, hi nn]
+  ld i  nn = error $ "Invalid operation: ld " ++ show i ++ " " ++ show nn
 
 instance (nn ~ Word16) => Load HL [nn] where
   ld HL [nn] = db $ pack [0x2a, lo nn, hi nn]
@@ -207,6 +208,7 @@ instance Load SP HL where
 instance Load SP RegIx where
   ld SP IX = db $ pack [0xdd, 0xf9]
   ld SP IY = db $ pack [0xfd, 0xf9]
+  ld SP i  = error $ "Invalid operation: ld SP " ++ show i
 
 
 
@@ -226,8 +228,10 @@ instance Stack AF where
 instance Stack RegIx where
   push IX = db $ pack [0xdd, 0xe5]
   push IY = db $ pack [0xfd, 0xe5]
+  push i  = error $ "Invalid operation: push " ++ show i
   pop  IX = db $ pack [0xdd, 0xe1]
   pop  IY = db $ pack [0xfd, 0xe1]
+  pop  i  = error $ "Invalid operation: pop " ++ show i
 
 
 
@@ -318,21 +322,21 @@ instance Arithmetic8 [HL] where
   cp    [HL] = db $ pack [0xbe]
   cp    x    = derefError x
 
-instance Arithmetic8 [IxOffset] where
-  sub   [IX :+ d] = db $ pack [0xdd, 0x96, d]
-  sub   [IY :+ d] = db $ pack [0xfd, 0x96, d]
+instance Arithmetic8 [RegIx] where
+  sub   [Just IX :+ d] = db $ pack [0xdd, 0x96, d]
+  sub   [Just IY :+ d] = db $ pack [0xfd, 0x96, d]
   sub   x         = derefError x
-  and   [IX :+ d] = db $ pack [0xdd, 0xa6, d]
-  and   [IY :+ d] = db $ pack [0xfd, 0xa6, d]
+  and   [Just IX :+ d] = db $ pack [0xdd, 0xa6, d]
+  and   [Just IY :+ d] = db $ pack [0xfd, 0xa6, d]
   and   x         = derefError x
-  or    [IX :+ d] = db $ pack [0xdd, 0xb6, d]
-  or    [IY :+ d] = db $ pack [0xfd, 0xb6, d]
+  or    [Just IX :+ d] = db $ pack [0xdd, 0xb6, d]
+  or    [Just IY :+ d] = db $ pack [0xfd, 0xb6, d]
   or    x         = derefError x
-  xor   [IX :+ d] = db $ pack [0xdd, 0xae, d]
-  xor   [IY :+ d] = db $ pack [0xfd, 0xae, d]
+  xor   [Just IX :+ d] = db $ pack [0xdd, 0xae, d]
+  xor   [Just IY :+ d] = db $ pack [0xfd, 0xae, d]
   xor   x         = derefError x
-  cp    [IX :+ d] = db $ pack [0xdd, 0xbe, d]
-  cp    [IY :+ d] = db $ pack [0xfd, 0xbe, d]
+  cp    [Just IX :+ d] = db $ pack [0xdd, 0xbe, d]
+  cp    [Just IY :+ d] = db $ pack [0xfd, 0xbe, d]
   cp    x         = derefError x
 
 class Inc operand where
@@ -353,12 +357,12 @@ instance Inc [HL] where
   dec [HL] = db $ pack [0x35]
   dec x    = derefError x
 
-instance Inc [IxOffset] where
-  inc [IX :+ d] = db $ pack [0xdd, 0x34, d]
-  inc [IY :+ d] = db $ pack [0xfd, 0x34, d]
+instance Inc [RegIx] where
+  inc [Just IX :+ d] = db $ pack [0xdd, 0x34, d]
+  inc [Just IY :+ d] = db $ pack [0xfd, 0x34, d]
   inc x         = derefError x
-  dec [IX :+ d] = db $ pack [0xdd, 0x35, d]
-  dec [IY :+ d] = db $ pack [0xfd, 0x35, d]
+  dec [Just IX :+ d] = db $ pack [0xdd, 0x35, d]
+  dec [Just IY :+ d] = db $ pack [0xfd, 0x35, d]
   dec x         = derefError x
 
 
@@ -436,18 +440,18 @@ instance CarryArithmetic A [HL] where
   sbc A [HL] = db $ pack [0x9e]
   sbc A x    = derefError x
 
-instance Arithmetic A [IxOffset] where
-  add A [IX :+ d] = db $ pack [0xdd, 0x86, d]
-  add A [IY :+ d] = db $ pack [0xfd, 0x86, d]
-  add A x         = derefError x
+instance Arithmetic A [RegIx] where
+  add A [Just IX :+ d] = db $ pack [0xdd, 0x86, d]
+  add A [Just IY :+ d] = db $ pack [0xfd, 0x86, d]
+  add A x              = derefError x
 
-instance CarryArithmetic A [IxOffset] where
-  adc A [IX :+ d] = db $ pack [0xdd, 0x8e, d]
-  adc A [IY :+ d] = db $ pack [0xfd, 0x8e, d]
-  adc A x         = derefError x
-  sbc A [IX :+ d] = db $ pack [0xdd, 0x9e, d]
-  sbc A [IY :+ d] = db $ pack [0xfd, 0x9e, d]
-  sbc A x         = derefError x
+instance CarryArithmetic A [RegIx] where
+  adc A [Just IX :+ d] = db $ pack [0xdd, 0x8e, d]
+  adc A [Just IY :+ d] = db $ pack [0xfd, 0x8e, d]
+  adc A x              = derefError x
+  sbc A [Just IX :+ d] = db $ pack [0xdd, 0x9e, d]
+  sbc A [Just IY :+ d] = db $ pack [0xfd, 0x9e, d]
+  sbc A x              = derefError x
 
 instance (Reg16 ss) => Arithmetic HL ss where
   add HL ss = db $ pack [encode ss .<. 4 .|. 0x09]
@@ -459,9 +463,11 @@ instance (Reg16 ss) => CarryArithmetic HL ss where
 instance (Reg16 ss, Show ss) => Arithmetic RegIx ss where
   add IX pp = db $ pack [0xdd, encode pp .<. 4 .|. 0x09]
   add IY pp = db $ pack [0xfd, encode pp .<. 4 .|. 0x09]
+  add i  i' = error $ "Invalid operation: add " ++ show i ++ " " ++ show i'
 instance Arithmetic RegIx SP where
   add IX pp = db $ pack [0xdd, encode pp .<. 4 .|. 0x09]
   add IY pp = db $ pack [0xfd, encode pp .<. 4 .|. 0x09]
+  add i  i' = error $ "Invalid operation: add " ++ show i ++ " " ++ show i'
 instance Arithmetic RegIx RegIx where
   add IX IX = db $ pack [0xdd, 0x2 .<. 4 .|. 0x09]
   add IY IY = db $ pack [0xfd, 0x2 .<. 4 .|. 0x09]
@@ -479,8 +485,10 @@ instance Inc SP where
 instance Inc RegIx where
   inc IX = db $ pack [0xdd, 0x23]
   inc IY = db $ pack [0xfd, 0x23]
+  inc i  = error $ "Invalid operation: inc " ++ show i
   dec IX = db $ pack [0xdd, 0x2b]
   dec IY = db $ pack [0xfd, 0x2b]
+  dec i  = error $ "Invalid operation: dec " ++ show i
 
 
 
@@ -532,28 +540,28 @@ instance RotateShift [HL] where
   srl [HL] = db $ pack [0xcb, 0x3e]
   srl x    = derefError x
 
-instance RotateShift [IxOffset] where
-  rlc [IX:+d] = db $ pack [0xdd, 0xcb, d, 0x06]
-  rlc [IY:+d] = db $ pack [0xfd, 0xcb, d, 0x06]
-  rlc x       = derefError x
-  rl  [IX:+d] = db $ pack [0xdd, 0xcb, d, 0x16]
-  rl  [IY:+d] = db $ pack [0xfd, 0xcb, d, 0x16]
-  rl  x       = derefError x
-  rrc [IX:+d] = db $ pack [0xdd, 0xcb, d, 0x0e]
-  rrc [IY:+d] = db $ pack [0xfd, 0xcb, d, 0x0e]
-  rrc x       = derefError x
-  rr  [IX:+d] = db $ pack [0xdd, 0xcb, d, 0x1e]
-  rr  [IY:+d] = db $ pack [0xfd, 0xcb, d, 0x1e]
-  rr  x       = derefError x
-  sla [IX:+d] = db $ pack [0xdd, 0xcb, d, 0x26]
-  sla [IY:+d] = db $ pack [0xfd, 0xcb, d, 0x26]
-  sla x       = derefError x
-  sra [IX:+d] = db $ pack [0xdd, 0xcb, d, 0x2e]
-  sra [IY:+d] = db $ pack [0xfd, 0xcb, d, 0x2e]
-  sra x       = derefError x
-  srl [IX:+d] = db $ pack [0xdd, 0xcb, d, 0x3e]
-  srl [IY:+d] = db $ pack [0xfd, 0xcb, d, 0x3e]
-  srl x       = derefError x
+instance RotateShift [RegIx] where
+  rlc [Just IX:+d] = db $ pack [0xdd, 0xcb, d, 0x06]
+  rlc [Just IY:+d] = db $ pack [0xfd, 0xcb, d, 0x06]
+  rlc x            = derefError x
+  rl  [Just IX:+d] = db $ pack [0xdd, 0xcb, d, 0x16]
+  rl  [Just IY:+d] = db $ pack [0xfd, 0xcb, d, 0x16]
+  rl  x            = derefError x
+  rrc [Just IX:+d] = db $ pack [0xdd, 0xcb, d, 0x0e]
+  rrc [Just IY:+d] = db $ pack [0xfd, 0xcb, d, 0x0e]
+  rrc x            = derefError x
+  rr  [Just IX:+d] = db $ pack [0xdd, 0xcb, d, 0x1e]
+  rr  [Just IY:+d] = db $ pack [0xfd, 0xcb, d, 0x1e]
+  rr  x            = derefError x
+  sla [Just IX:+d] = db $ pack [0xdd, 0xcb, d, 0x26]
+  sla [Just IY:+d] = db $ pack [0xfd, 0xcb, d, 0x26]
+  sla x            = derefError x
+  sra [Just IX:+d] = db $ pack [0xdd, 0xcb, d, 0x2e]
+  sra [Just IY:+d] = db $ pack [0xfd, 0xcb, d, 0x2e]
+  sra x            = derefError x
+  srl [Just IX:+d] = db $ pack [0xdd, 0xcb, d, 0x3e]
+  srl [Just IY:+d] = db $ pack [0xfd, 0xcb, d, 0x3e]
+  srl x            = derefError x
 
 rld, rrd :: Z80ASM
 rld = db $ pack [0xed, 0x6f]
