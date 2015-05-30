@@ -386,27 +386,37 @@ im x = error $ "Invalid interrupt mode: " ++ show x
 
 class Arithmetic target operand where
   add :: target -> operand -> Z80ASM
+
+class CarryArithmetic target operand where
   adc :: target -> operand -> Z80ASM
   sbc :: target -> operand -> Z80ASM
 
 instance Arithmetic A A where
   add A r = db $ pack [0x1 .<. 7 .|. encode r]
+
+instance CarryArithmetic A A where
   adc A r = db $ pack [0x1 .<. 7 .|. 0x1 .<. 3 .|. encode r]
   sbc A r = db $ pack [0x1 .<. 7 .|. 0x3 .<. 3 .|. encode r]
 
 instance Arithmetic A Reg8 where
   add A r = db $ pack [0x1 .<. 7 .|. encode r]
+
+instance CarryArithmetic A Reg8 where
   adc A r = db $ pack [0x1 .<. 7 .|. 0x1 .<. 3 .|. encode r]
   sbc A r = db $ pack [0x1 .<. 7 .|. 0x3 .<. 3 .|. encode r]
 
 instance (n ~ Word8) => Arithmetic A n where
   add A n = db $ pack [0xc6, n]
+
+instance (n ~ Word8) => CarryArithmetic A n where
   adc A n = db $ pack [0xce, n]
   sbc A n = db $ pack [0xde, n]
 
 instance Arithmetic A [HL] where
   add A [HL] = db $ pack [0x86]
   add A x    = derefError x
+
+instance CarryArithmetic A [HL] where
   adc A [HL] = db $ pack [0x8e]
   adc A x    = derefError x
   sbc A [HL] = db $ pack [0x9e]
@@ -416,6 +426,8 @@ instance Arithmetic A [IxOffset] where
   add A [IX :+ d] = db $ pack [0xdd, 0x86, d]
   add A [IY :+ d] = db $ pack [0xfd, 0x86, d]
   add A x         = derefError x
+
+instance CarryArithmetic A [IxOffset] where
   adc A [IX :+ d] = db $ pack [0xdd, 0x8e, d]
   adc A [IY :+ d] = db $ pack [0xfd, 0x8e, d]
   adc A x         = derefError x
