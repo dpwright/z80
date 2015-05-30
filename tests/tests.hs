@@ -105,5 +105,15 @@ main = defaultMain $ testGroup "Tests" [
   , testCase "IM 0"         $ im 0                 $?= [0xed, 0x46]
   , testCase "IM 1"         $ im 1                 $?= [0xed, 0x56]
   , testCase "IM 2"         $ im 2                 $?= [0xed, 0x5e]
+  ],
+  testGroup "16-Bit Arithmetic Group"
+  [ testCase "ADD HL, ss"   $ add HL DE            $?= [0x19]
+  , testCase "ADC HL, ss"   $ adc HL BC            $?= [0xed, 0x4a]
+  , testCase "SBC HL, ss"   $ sbc HL DE            $?= [0xed, 0x52]
+  , testCase "INC HL"       $ inc HL               $?= [0x23]
+  , testCase "INC IX"       $ inc IX               $?= [0xdd, 0x23]
+  , testCase "INC IY"       $ inc IY               $?= [0xfd, 0x23]
+  , testCase "DEC IX"       $ dec IX               $?= [0xdd, 0x2b]
+  , testCase "DEC IY"       $ dec IY               $?= [0xfd, 0x2b]
   ]
   ]

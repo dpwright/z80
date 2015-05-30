@@ -435,6 +435,39 @@ instance CarryArithmetic A [IxOffset] where
   sbc A [IY :+ d] = db $ pack [0xfd, 0x9e, d]
   sbc A x         = derefError x
 
+instance (Reg16 ss) => Arithmetic HL ss where
+  add HL ss = db $ pack [encode ss .<. 4 .|. 0x09]
+
+instance (Reg16 ss) => CarryArithmetic HL ss where
+  adc HL ss = db $ pack [0xed, 0x40 .|. encode ss .<. 4 .|. 0x0a]
+  sbc HL ss = db $ pack [0xed, 0x40 .|. encode ss .<. 4 .|. 0x2]
+
+instance (Reg16 ss, Show ss) => Arithmetic RegIx ss where
+  add IX pp = db $ pack [0xdd, encode pp .<. 4 .|. 0x09]
+  add IY pp = db $ pack [0xfd, encode pp .<. 4 .|. 0x09]
+instance Arithmetic RegIx SP where
+  add IX pp = db $ pack [0xdd, encode pp .<. 4 .|. 0x09]
+  add IY pp = db $ pack [0xfd, encode pp .<. 4 .|. 0x09]
+instance Arithmetic RegIx RegIx where
+  add IX IX = db $ pack [0xdd, 0x2 .<. 4 .|. 0x09]
+  add IY IY = db $ pack [0xfd, 0x2 .<. 4 .|. 0x09]
+  add i  i' = error $ "Invalid operation: add " ++ show i ++ " " ++ show i'
+
+instance (Reg16 ss) => Inc ss where
+  inc r = db $ pack [encode r .<. 4 .|. 0x3]
+  dec r = db $ pack [encode r .<. 4 .|. 0xb]
+instance Inc HL where
+  inc r = db $ pack [encode r .<. 4 .|. 0x3]
+  dec r = db $ pack [encode r .<. 4 .|. 0xb]
+instance Inc SP where
+  inc r = db $ pack [encode r .<. 4 .|. 0x3]
+  dec r = db $ pack [encode r .<. 4 .|. 0xb]
+instance Inc RegIx where
+  inc IX = db $ pack [0xdd, 0x23]
+  inc IY = db $ pack [0xfd, 0x23]
+  dec IX = db $ pack [0xdd, 0x2b]
+  dec IY = db $ pack [0xfd, 0x2b]
+
 {- -------- INTERNAL UTILITIES -------- -}
 
 (.<.) :: Bits a => a -> Int -> a
