@@ -151,5 +151,16 @@ main = defaultMain $ testGroup "Tests" [
   , testCase "SRL (IY+d)"   $ srl [IY + 0x02]      $?= [0xfd, 0xcb, 0x02, 0x3e]
   , testCase "RLD"          $ rld                  $?= [0xed, 0x6f]
   , testCase "RRD"          $ rrd                  $?= [0xed, 0x67]
+  ],
+  testGroup "Bit Set, Reset, and Test Group"
+  [ testCase "BIT b, r"     $ bit 2 B              $?= [0xcb, 0x50]
+  , testCase "BIT b, (HL)"  $ bit 4 [HL]           $?= [0xcb, 0x66]
+  , testCase "BIT b, (IX+d)"$ bit 6 [IX + 0x04]    $?= [0xdd, 0xcb, 0x04, 0x76]
+  , testCase "BIT b, (IY+d)"$ bit 6 [IY + 0x04]    $?= [0xfd, 0xcb, 0x04, 0x76]
+  , testCase "SET b, r"     $ set 4 A              $?= [0xcb, 0xe7]
+  , testCase "SET b, (HL)"  $ set 4 [HL]           $?= [0xcb, 0xe6]
+  , testCase "SET b, (IX+d)"$ set 0 [IX + 0x03]    $?= [0xdd, 0xcb, 0x03, 0xc6]
+  , testCase "SET b, (IY+d)"$ set 0 [IY + 0x03]    $?= [0xfd, 0xcb, 0x03, 0xc6]
+  , testCase "RES b, r"     $ res 6 D              $?= [0xcb, 0xb2]
   ]
   ]

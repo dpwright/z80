@@ -57,9 +57,13 @@ module Z80.Operations
   , srl
   , rld
   , rrd
+    -- * Bit Set, Reset, and Test Group
+  , bit
+  , set
+  , res
   ) where
 
-import Data.Bits hiding (xor)
+import Data.Bits hiding (xor, bit)
 import Data.Word
 import Data.ByteString
 
@@ -541,6 +545,42 @@ instance RotateShift [RegIx] where
 rld, rrd :: Z80ASM
 rld = db $ pack [0xed, 0x6f]
 rrd = db $ pack [0xed, 0x67]
+
+
+
+class Bitwise r where
+  bit :: Word8 -> r -> Z80ASM
+  set :: Word8 -> r -> Z80ASM
+  res :: Word8 -> r -> Z80ASM
+
+instance Bitwise Reg8 where
+  bit b r = db $ pack [0xcb, 0x1 .<. 6 .|. b .<. 3 .|. encode r]
+  set b r = db $ pack [0xcb, 0x3 .<. 6 .|. b .<. 3 .|. encode r]
+  res b r = db $ pack [0xcb, 0x2 .<. 6 .|. b .<. 3 .|. encode r]
+
+instance Bitwise A where
+  bit b r = db $ pack [0xcb, 0x1 .<. 6 .|. b .<. 3 .|. encode r]
+  set b r = db $ pack [0xcb, 0x3 .<. 6 .|. b .<. 3 .|. encode r]
+  res b r = db $ pack [0xcb, 0x2 .<. 6 .|. b .<. 3 .|. encode r]
+
+instance Bitwise [HL] where
+  bit b [HL] = db $ pack [0xcb, 0x1 .<. 6 .|. b .<. 3 .|. 0x6]
+  bit _ x    = derefError x
+  set b [HL] = db $ pack [0xcb, 0x3 .<. 6 .|. b .<. 3 .|. 0x6]
+  set _ x    = derefError x
+  res b [HL] = db $ pack [0xcb, 0x2 .<. 6 .|. b .<. 3 .|. 0x6]
+  res _ x    = derefError x
+
+instance Bitwise [RegIx] where
+  bit b [i :+ d] = db $ pack [encodeOrError i, 0xcb, d, 0x1 .<. 6 .|. b .<. 3 .|. 0x6]
+  bit b [i]      = bit b [i+0]
+  bit _ x        = derefError x
+  set b [i :+ d] = db $ pack [encodeOrError i, 0xcb, d, 0x3 .<. 6 .|. b .<. 3 .|. 0x6]
+  set b [i]      = set b [i+0]
+  set _ x        = derefError x
+  res b [i :+ d] = db $ pack [encodeOrError i, 0xcb, d, 0x2 .<. 6 .|. b .<. 3 .|. 0x6]
+  res b [i]      = res b [i+0]
+  res _ x        = derefError x
 
 {- -------- INTERNAL UTILITIES -------- -}
 
