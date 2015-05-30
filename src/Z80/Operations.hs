@@ -100,34 +100,24 @@ instance (n ~ Word8) => Load [HL] n where
   ld x _ = derefError x
 
 instance Load Reg8 [RegIx] where
-  ld r [Just IX :+ ofst] = db $
-    pack [0xdd, 1 .<. 6 .|. encode r .<. 3 .|. 6, ofst]
-  ld r [Just IY :+ ofst] = db $
-    pack [0xfd, 1 .<. 6 .|. encode r .<. 3 .|. 6, ofst]
+  ld r [i :+ ofst] = db $
+    pack [encodeOrError i, 1 .<. 6 .|. encode r .<. 3 .|. 6, ofst]
   ld _ x = derefError x
 instance Load A [RegIx] where
-  ld r [Just IX :+ ofst] = db $
-    pack [0xdd, 1 .<. 6 .|. encode r .<. 3 .|. 6, ofst]
-  ld r [Just IY :+ ofst] = db $
-    pack [0xfd, 1 .<. 6 .|. encode r .<. 3 .|. 6, ofst]
+  ld r [i :+ ofst] = db $
+    pack [encodeOrError i, 1 .<. 6 .|. encode r .<. 3 .|. 6, ofst]
   ld _ x = derefError x
 instance Load [RegIx] Reg8 where
-  ld [Just IX :+ ofst] r = db $
-    pack [0xdd, 1 .<. 6 .|. 6 .<. 3 .|. encode r, ofst]
-  ld [Just IY :+ ofst] r = db $
-    pack [0xfd, 1 .<. 6 .|. 6 .<. 3 .|. encode r, ofst]
+  ld [i :+ ofst] r = db $
+    pack [encodeOrError i, 1 .<. 6 .|. 6 .<. 3 .|. encode r, ofst]
   ld x _ = derefError x
 instance Load [RegIx] A where
-  ld [Just IX :+ ofst] r = db $
-    pack [0xdd, 1 .<. 6 .|. 6 .<. 3 .|. encode r, ofst]
-  ld [Just IY :+ ofst] r = db $
-    pack [0xfd, 1 .<. 6 .|. 6 .<. 3 .|. encode r, ofst]
+  ld [i :+ ofst] r = db $
+    pack [encodeOrError i, 1 .<. 6 .|. 6 .<. 3 .|. encode r, ofst]
   ld x _ = derefError x
 instance (n ~ Word8) => Load [RegIx] n where
-  ld [Just IX :+ ofst] n = db $
-    pack [0xdd, 0x36, ofst, n]
-  ld [Just IY :+ ofst] n = db $
-    pack [0xfd, 0x36, ofst, n]
+  ld [i :+ ofst] n = db $
+    pack [encodeOrError i, 0x36, ofst, n]
   ld x _ = derefError x
 
 instance Load A [BC] where
@@ -167,9 +157,7 @@ instance (nn ~ Word16) => Load SP nn where
   ld dd nn = db $ pack [encode dd .<. 4 .|. 0x01, lo nn, hi nn]
 
 instance (nn ~ Word16) => Load RegIx nn where
-  ld IX nn = db $ pack [0xdd, 0x21, lo nn, hi nn]
-  ld IY nn = db $ pack [0xfd, 0x21, lo nn, hi nn]
-  ld i  nn = error $ "Invalid operation: ld " ++ show i ++ " " ++ show nn
+  ld i nn = db $ pack [encode i, 0x21, lo nn, hi nn]
 
 instance (nn ~ Word16) => Load HL [nn] where
   ld HL [nn] = db $ pack [0x2a, lo nn, hi nn]
@@ -194,21 +182,17 @@ instance (nn ~ Word16) => Load [nn] SP where
   ld x _ = derefError x
 
 instance (nn ~ Word16) => Load RegIx [nn] where
-  ld IX [nn] = db $ pack [0xdd, 0x2a, lo nn, hi nn]
-  ld IY [nn] = db $ pack [0xfd, 0x2a, lo nn, hi nn]
-  ld _ x = derefError x
+  ld i [nn] = db $ pack [encode i, 0x2a, lo nn, hi nn]
+  ld _ x    = derefError x
 instance (nn ~ Word16) => Load [nn] RegIx where
-  ld [nn] IX = db $ pack [0xdd, 0x22, lo $ fromIntegral nn, hi $ fromIntegral nn]
-  ld [nn] IY = db $ pack [0xfd, 0x22, lo $ fromIntegral nn, hi $ fromIntegral nn]
-  ld x _ = derefError x
+  ld [nn] i = db $ pack [encode i, 0x22, lo $ fromIntegral nn, hi $ fromIntegral nn]
+  ld x _    = derefError x
 
 instance Load SP HL where
   ld SP HL = db $ pack [0xf9]
 
 instance Load SP RegIx where
-  ld SP IX = db $ pack [0xdd, 0xf9]
-  ld SP IY = db $ pack [0xfd, 0xf9]
-  ld SP i  = error $ "Invalid operation: ld SP " ++ show i
+  ld SP i = db $ pack [encode i, 0xf9]
 
 
 
@@ -226,12 +210,8 @@ instance Stack AF where
   push qq = db $ pack [0x3 .<. 6 .|. encode qq .<. 4 .|. 0x5]
   pop  qq = db $ pack [0x3 .<. 6 .|. encode qq .<. 4 .|. 0x1]
 instance Stack RegIx where
-  push IX = db $ pack [0xdd, 0xe5]
-  push IY = db $ pack [0xfd, 0xe5]
-  push i  = error $ "Invalid operation: push " ++ show i
-  pop  IX = db $ pack [0xdd, 0xe1]
-  pop  IY = db $ pack [0xfd, 0xe1]
-  pop  i  = error $ "Invalid operation: pop " ++ show i
+  push i = db $ pack [encode i, 0xe5]
+  pop  i = db $ pack [encode i, 0xe1]
 
 
 
@@ -249,9 +229,8 @@ instance Exchange [SP] HL where
   ex x    _  = derefError x
 
 instance Exchange [SP] RegIx where
-  ex [SP] IX = db $ pack [0xdd, 0xe3]
-  ex [SP] IY = db $ pack [0xfd, 0xe3]
-  ex x    _  = derefError x
+  ex [SP] i = db $ pack [encode i, 0xe3]
+  ex x    _ = derefError x
 
 exx :: Z80ASM
 exx = db $ pack [0xd9]
@@ -323,21 +302,16 @@ instance Arithmetic8 [HL] where
   cp    x    = derefError x
 
 instance Arithmetic8 [RegIx] where
-  sub   [Just IX :+ d] = db $ pack [0xdd, 0x96, d]
-  sub   [Just IY :+ d] = db $ pack [0xfd, 0x96, d]
-  sub   x         = derefError x
-  and   [Just IX :+ d] = db $ pack [0xdd, 0xa6, d]
-  and   [Just IY :+ d] = db $ pack [0xfd, 0xa6, d]
-  and   x         = derefError x
-  or    [Just IX :+ d] = db $ pack [0xdd, 0xb6, d]
-  or    [Just IY :+ d] = db $ pack [0xfd, 0xb6, d]
-  or    x         = derefError x
-  xor   [Just IX :+ d] = db $ pack [0xdd, 0xae, d]
-  xor   [Just IY :+ d] = db $ pack [0xfd, 0xae, d]
-  xor   x         = derefError x
-  cp    [Just IX :+ d] = db $ pack [0xdd, 0xbe, d]
-  cp    [Just IY :+ d] = db $ pack [0xfd, 0xbe, d]
-  cp    x         = derefError x
+  sub   [i :+ d] = db $ pack [encodeOrError i, 0x96, d]
+  sub   x        = derefError x
+  and   [i :+ d] = db $ pack [encodeOrError i, 0xa6, d]
+  and   x        = derefError x
+  or    [i :+ d] = db $ pack [encodeOrError i, 0xb6, d]
+  or    x        = derefError x
+  xor   [i :+ d] = db $ pack [encodeOrError i, 0xae, d]
+  xor   x        = derefError x
+  cp    [i :+ d] = db $ pack [encodeOrError i, 0xbe, d]
+  cp    x        = derefError x
 
 class Inc operand where
   inc :: operand -> Z80ASM
@@ -358,12 +332,10 @@ instance Inc [HL] where
   dec x    = derefError x
 
 instance Inc [RegIx] where
-  inc [Just IX :+ d] = db $ pack [0xdd, 0x34, d]
-  inc [Just IY :+ d] = db $ pack [0xfd, 0x34, d]
-  inc x         = derefError x
-  dec [Just IX :+ d] = db $ pack [0xdd, 0x35, d]
-  dec [Just IY :+ d] = db $ pack [0xfd, 0x35, d]
-  dec x         = derefError x
+  inc [i :+ d] = db $ pack [encodeOrError i, 0x34, d]
+  inc x        = derefError x
+  dec [i :+ d] = db $ pack [encodeOrError i, 0x35, d]
+  dec x        = derefError x
 
 
 
@@ -441,17 +413,14 @@ instance CarryArithmetic A [HL] where
   sbc A x    = derefError x
 
 instance Arithmetic A [RegIx] where
-  add A [Just IX :+ d] = db $ pack [0xdd, 0x86, d]
-  add A [Just IY :+ d] = db $ pack [0xfd, 0x86, d]
-  add A x              = derefError x
+  add A [i :+ d] = db $ pack [encodeOrError i, 0x86, d]
+  add A x        = derefError x
 
 instance CarryArithmetic A [RegIx] where
-  adc A [Just IX :+ d] = db $ pack [0xdd, 0x8e, d]
-  adc A [Just IY :+ d] = db $ pack [0xfd, 0x8e, d]
-  adc A x              = derefError x
-  sbc A [Just IX :+ d] = db $ pack [0xdd, 0x9e, d]
-  sbc A [Just IY :+ d] = db $ pack [0xfd, 0x9e, d]
-  sbc A x              = derefError x
+  adc A [i :+ d] = db $ pack [encodeOrError i, 0x8e, d]
+  adc A x        = derefError x
+  sbc A [i :+ d] = db $ pack [encodeOrError i, 0x9e, d]
+  sbc A x        = derefError x
 
 instance (Reg16 ss) => Arithmetic HL ss where
   add HL ss = db $ pack [encode ss .<. 4 .|. 0x09]
@@ -461,17 +430,12 @@ instance (Reg16 ss) => CarryArithmetic HL ss where
   sbc HL ss = db $ pack [0xed, 0x40 .|. encode ss .<. 4 .|. 0x2]
 
 instance (Reg16 ss, Show ss) => Arithmetic RegIx ss where
-  add IX pp = db $ pack [0xdd, encode pp .<. 4 .|. 0x09]
-  add IY pp = db $ pack [0xfd, encode pp .<. 4 .|. 0x09]
-  add i  i' = error $ "Invalid operation: add " ++ show i ++ " " ++ show i'
+  add i pp = db $ pack [encode i, encode pp .<. 4 .|. 0x09]
 instance Arithmetic RegIx SP where
-  add IX pp = db $ pack [0xdd, encode pp .<. 4 .|. 0x09]
-  add IY pp = db $ pack [0xfd, encode pp .<. 4 .|. 0x09]
-  add i  i' = error $ "Invalid operation: add " ++ show i ++ " " ++ show i'
+  add i pp = db $ pack [encode i, encode pp .<. 4 .|. 0x09]
 instance Arithmetic RegIx RegIx where
-  add IX IX = db $ pack [0xdd, 0x2 .<. 4 .|. 0x09]
-  add IY IY = db $ pack [0xfd, 0x2 .<. 4 .|. 0x09]
-  add i  i' = error $ "Invalid operation: add " ++ show i ++ " " ++ show i'
+  add i i' | i == i' = db $ pack [encode i, 0x2 .<. 4 .|. 0x09]
+  add i  i'          = error $ "Invalid operation: add " ++ show i ++ " " ++ show i'
 
 instance (Reg16 ss) => Inc ss where
   inc r = db $ pack [encode r .<. 4 .|. 0x3]
@@ -483,12 +447,8 @@ instance Inc SP where
   inc r = db $ pack [encode r .<. 4 .|. 0x3]
   dec r = db $ pack [encode r .<. 4 .|. 0xb]
 instance Inc RegIx where
-  inc IX = db $ pack [0xdd, 0x23]
-  inc IY = db $ pack [0xfd, 0x23]
-  inc i  = error $ "Invalid operation: inc " ++ show i
-  dec IX = db $ pack [0xdd, 0x2b]
-  dec IY = db $ pack [0xfd, 0x2b]
-  dec i  = error $ "Invalid operation: dec " ++ show i
+  inc i = db $ pack [encode i, 0x23]
+  dec i = db $ pack [encode i, 0x2b]
 
 
 

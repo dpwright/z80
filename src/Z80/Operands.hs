@@ -5,6 +5,7 @@ module Z80.Operands
     Reg8 (..)
   , Reg16
   , Encodable (..)
+  , encodeOrError
     -- * Special Registers
   , A (..), F (..), I (..), R (..)
   , BC (..), DE (..), HL (..)
@@ -105,3 +106,12 @@ instance Encodable AF where
 class Encodable r => Reg16 r
 instance Reg16 BC
 instance Reg16 DE
+
+instance Encodable RegIx where
+  encode IX = 0xdd
+  encode IY = 0xfd
+  encode i  = error $ "Cannot encode offset index: " ++ show i
+
+encodeOrError :: Encodable x => Maybe x -> Word8
+encodeOrError (Just x) = encode x
+encodeOrError Nothing  = error $ "Cannot encode register: no value"
