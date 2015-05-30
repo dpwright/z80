@@ -43,6 +43,20 @@ module Z80.Operations
   , add
   , adc
   , sbc
+    -- * Rotate and Shift Group
+  , rlca
+  , rla
+  , rrca
+  , rra
+  , rlc
+  , rl
+  , rrc
+  , rr
+  , sla
+  , sra
+  , srl
+  , rld
+  , rrd
   ) where
 
 import Data.Bits hiding (xor)
@@ -467,6 +481,83 @@ instance Inc RegIx where
   inc IY = db $ pack [0xfd, 0x23]
   dec IX = db $ pack [0xdd, 0x2b]
   dec IY = db $ pack [0xfd, 0x2b]
+
+
+
+rlca, rla, rrca, rra :: Z80ASM
+rlca = db $ pack [0x07]
+rla  = db $ pack [0x17]
+rrca = db $ pack [0x0f]
+rra  = db $ pack [0x1f]
+
+class RotateShift r where
+  rlc :: r -> Z80ASM
+  rl  :: r -> Z80ASM
+  rrc :: r -> Z80ASM
+  rr  :: r -> Z80ASM
+  sla :: r -> Z80ASM
+  sra :: r -> Z80ASM
+  srl :: r -> Z80ASM
+
+instance RotateShift Reg8 where
+  rlc r = db $ pack [0xcb, encode r]
+  rl  r = db $ pack [0xcb, 0x2 .<. 3 .|. encode r]
+  rrc r = db $ pack [0xcb, 0x1 .<. 3 .|. encode r]
+  rr  r = db $ pack [0xcb, 0x3 .<. 3 .|. encode r]
+  sla r = db $ pack [0xcb, 0x4 .<. 3 .|. encode r]
+  sra r = db $ pack [0xcb, 0x5 .<. 3 .|. encode r]
+  srl r = db $ pack [0xcb, 0x7 .<. 3 .|. encode r]
+instance RotateShift A where
+  rlc r = db $ pack [0xcb, encode r]
+  rl  r = db $ pack [0xcb, 0x2 .<. 3 .|. encode r]
+  rrc r = db $ pack [0xcb, 0x1 .<. 3 .|. encode r]
+  rr  r = db $ pack [0xcb, 0x3 .<. 3 .|. encode r]
+  sla r = db $ pack [0xcb, 0x4 .<. 3 .|. encode r]
+  sra r = db $ pack [0xcb, 0x5 .<. 3 .|. encode r]
+  srl r = db $ pack [0xcb, 0x7 .<. 3 .|. encode r]
+
+instance RotateShift [HL] where
+  rlc [HL] = db $ pack [0xcb, 0x06]
+  rlc x    = derefError x
+  rl  [HL] = db $ pack [0xcb, 0x16]
+  rl  x    = derefError x
+  rrc [HL] = db $ pack [0xcb, 0x0e]
+  rrc x    = derefError x
+  rr  [HL] = db $ pack [0xcb, 0x1e]
+  rr  x    = derefError x
+  sla [HL] = db $ pack [0xcb, 0x26]
+  sla x    = derefError x
+  sra [HL] = db $ pack [0xcb, 0x2e]
+  sra x    = derefError x
+  srl [HL] = db $ pack [0xcb, 0x3e]
+  srl x    = derefError x
+
+instance RotateShift [IxOffset] where
+  rlc [IX:+d] = db $ pack [0xdd, 0xcb, d, 0x06]
+  rlc [IY:+d] = db $ pack [0xfd, 0xcb, d, 0x06]
+  rlc x       = derefError x
+  rl  [IX:+d] = db $ pack [0xdd, 0xcb, d, 0x16]
+  rl  [IY:+d] = db $ pack [0xfd, 0xcb, d, 0x16]
+  rl  x       = derefError x
+  rrc [IX:+d] = db $ pack [0xdd, 0xcb, d, 0x0e]
+  rrc [IY:+d] = db $ pack [0xfd, 0xcb, d, 0x0e]
+  rrc x       = derefError x
+  rr  [IX:+d] = db $ pack [0xdd, 0xcb, d, 0x1e]
+  rr  [IY:+d] = db $ pack [0xfd, 0xcb, d, 0x1e]
+  rr  x       = derefError x
+  sla [IX:+d] = db $ pack [0xdd, 0xcb, d, 0x26]
+  sla [IY:+d] = db $ pack [0xfd, 0xcb, d, 0x26]
+  sla x       = derefError x
+  sra [IX:+d] = db $ pack [0xdd, 0xcb, d, 0x2e]
+  sra [IY:+d] = db $ pack [0xfd, 0xcb, d, 0x2e]
+  sra x       = derefError x
+  srl [IX:+d] = db $ pack [0xdd, 0xcb, d, 0x3e]
+  srl [IY:+d] = db $ pack [0xfd, 0xcb, d, 0x3e]
+  srl x       = derefError x
+
+rld, rrd :: Z80ASM
+rld = db $ pack [0xed, 0x6f]
+rrd = db $ pack [0xed, 0x67]
 
 {- -------- INTERNAL UTILITIES -------- -}
 
