@@ -1,7 +1,7 @@
 import Test.Tasty
 import Test.Tasty.HUnit
 
-import Data.ByteString
+import Data.ByteString as BS
 import Data.Word
 
 import Z80
@@ -11,6 +11,9 @@ import Prelude hiding (and, or)
 ($?=) :: Z80ASM -> [Word8] -> Assertion
 asm $?= bytes = extractBytes asm @?= pack bytes
   where extractBytes = asmData . org 0
+
+pad :: Int -> Z80ASM -> Z80ASM
+pad n asm = db (BS.replicate n 0) >> asm
 
 main :: IO ()
 main = defaultMain $ testGroup "Tests" [
