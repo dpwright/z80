@@ -6,6 +6,7 @@ module Z80.Assembler
   , ASMBlock (..)
   , org
   , db
+  , equ
   , label ) where
 
 import Data.ByteString as BS
@@ -38,3 +39,6 @@ label = Z80 get
 org :: Location -> Z80ASM -> ASMBlock
 org addr (Z80 mc) = ASMBlock { asmOrg = addr, asmData = asm }
  where ((), _, asm) = runRWS mc () addr
+
+equ :: a -> Z80 a
+equ = return
