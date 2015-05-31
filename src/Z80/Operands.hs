@@ -12,6 +12,9 @@ module Z80.Operands
   , AF' (..)
     -- * Index Registers & Offsets
   , RegIx (..)
+    -- * Conditions
+  , Condition (..)
+  , Z (..), NZ (..), NC (..)
     -- * Addresses
   , Location
   ) where
@@ -75,5 +78,15 @@ compatibleIx i Nothing = i
 compatibleIx Nothing i = i
 compatibleIx (Just i) (Just i') =
   error $ "Cannot add two indices: " ++ show i ++ " and " ++ show i'
+
+data NC = NC deriving (Show)
+data NZ = NZ deriving (Show)
+data Z  = Z  deriving (Show)
+
+data Condition
+  = PO
+  | PE
+  | P
+  | M
 
 type Location = Word16

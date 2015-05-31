@@ -696,3 +696,28 @@ instance EncodeReg16 RegIx where
 encodeOrError :: EncodeReg16 x => Maybe x -> Word8
 encodeOrError (Just x) = encodeReg16 x
 encodeOrError Nothing  = error $ "Cannot encode register: no value"
+
+class EncodeCondition r where
+  encodeCondition :: r -> Word8
+
+instance EncodeCondition Condition where
+  encodeCondition PO = 0x4
+  encodeCondition PE = 0x5
+  encodeCondition P  = 0x6
+  encodeCondition M  = 0x7
+
+instance EncodeCondition NZ where
+  encodeCondition NZ = 0x0
+instance EncodeCondition Z where
+  encodeCondition Z  = 0x1
+instance EncodeCondition NC where
+  encodeCondition NC = 0x2
+instance EncodeCondition C where
+  encodeCondition C  = 0x3
+
+class EncodeCondition c => Cond c
+instance Cond Condition
+instance Cond NZ
+instance Cond Z
+instance Cond NC
+instance Cond C
