@@ -61,6 +61,12 @@ module Z80.Operations
   , bit
   , set
   , res
+    -- * Jump Group
+  , jp
+  , jr
+  , djnz
+  , ($-)
+  , ($+)
   ) where
 
 import Data.Bits hiding (xor, bit)
@@ -71,6 +77,7 @@ import Z80.Assembler
 import Z80.Operands
 
 import Prelude hiding (and, or)
+import Control.Monad ((>=>))
 
 class Load tgt src where
   ld :: tgt -> src -> Z80ASM
@@ -639,6 +646,46 @@ instance Bitwise [RegIx] where
   res b [i]      = res b [i+0]
   res _ x        = derefError x
 
+
+
+class Jump p r where
+  jp :: p -> r
+
+instance (nn ~ Word16) => Jump nn Z80ASM where
+  jp nn = db $ pack [0xc3, lo nn, hi nn]
+
+instance (Cond cc, nn ~ Word16) => Jump cc (nn -> Z80ASM) where
+  jp cc = \nn -> db $ pack [0x3 .<. 6 .|. encodeCondition cc .<. 3 .|. 0x2, lo nn, hi nn]
+
+instance Jump [HL] Z80ASM where
+  jp [HL] = db $ pack [0xe9]
+  jp x    = derefError x
+
+instance Jump [RegIx] Z80ASM where
+  jp [i] = db $ pack [encodeReg16 i, 0xe9]
+  jp x   = derefError x
+
+class JumpRelative p r where
+  jr :: p -> r
+
+instance (a ~ Word16) => JumpRelative a Z80ASM where
+  jr    = relative >=> \a -> db $ pack [0x18, a-2]
+instance (a ~ Word16) => JumpRelative C (a -> Z80ASM) where
+  jr C  = relative >=> \a -> db $ pack [0x38, a-2]
+instance (a ~ Word16) => JumpRelative NC (a -> Z80ASM) where
+  jr NC = relative >=> \a -> db $ pack [0x30, a-2]
+instance (a ~ Word16) => JumpRelative Z (a -> Z80ASM) where
+  jr Z  = relative >=> \a -> db $ pack [0x28, a-2]
+instance (a ~ Word16) => JumpRelative NZ (a -> Z80ASM) where
+  jr NZ = relative >=> \a -> db $ pack [0x20, a-2]
+
+djnz :: Word16 -> Z80ASM
+djnz = relative >=> \a -> db $ pack [0x10, a-2]
+
+($-), ($+) :: (Word16 -> Z80ASM) -> Word16 -> Z80ASM
+op $- a = op . subtract a =<< label
+op $+ a = op . (+ a) =<< label
+
 {- -------- INTERNAL UTILITIES -------- -}
 
 (.<.) :: Bits a => a -> Int -> a
@@ -647,6 +694,13 @@ instance Bitwise [RegIx] where
 hi, lo :: Word16 -> Word8
 hi = fromIntegral . byteSwap16
 lo = fromIntegral
+
+-- Get an address relative to the current address
+relative :: Word16 -> Z80 Word8
+relative a = fromIntegral . validate . (`subtract` (fromIntegral a)) . asInt <$> label
+  where asInt x = fromIntegral x :: Int
+        validate x | x >= (-126) && x <= 129 = x
+                   | otherwise = error $ "Relative address out of range: " ++ show x
 
 derefError :: Show a => a -> b
 derefError x = error $ "Dereference syntax is a list with exactly one entry. Invalid: " ++ show x

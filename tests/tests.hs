@@ -165,5 +165,16 @@ main = defaultMain $ testGroup "Tests" [
   , testCase "SET b, (IX+d)"$ set 0 [IX + 0x03]    $?= [0xdd, 0xcb, 0x03, 0xc6]
   , testCase "SET b, (IY+d)"$ set 0 [IY + 0x03]    $?= [0xfd, 0xcb, 0x03, 0xc6]
   , testCase "RES b, r"     $ res 6 D              $?= [0xcb, 0xb2]
+  ],
+  testGroup "Jump Group"
+  [ testCase "JP nn"        $ jp 0x8832            $?= [0xc3, 0x32, 0x88]
+  , testCase "JP cc,nn"     $ jp C 0x1520          $?= [0xda, 0x20, 0x15]
+  , testCase "JP (HL)"      $ jp [HL]              $?= [0xe9]
+  , testCase "JR e"         $ jr $+ 5              $?= [0x18, 3]
+  , testCase "JR C,e"       $ pad 4 (jr C $- 4)    $?= [0, 0, 0, 0, 0x38, -6]
+  , testCase "JR NC,e"      $ jr NC $+ 0           $?= [0x30, -2]
+  , testCase "JR Z,e"       $ jr Z $+ 5            $?= [0x28, 3]
+  , testCase "JR NZ,e"      $ pad 4 (jr NZ $- 4)   $?= [0, 0, 0, 0, 0x20, -6]
+  , testCase "DJNZ"         $ djnz $+ 5            $?= [0x10, 3]
   ]
   ]
