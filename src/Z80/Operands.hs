@@ -3,9 +3,9 @@
 module Z80.Operands
   ( -- * Generic Registers
     Reg8 (..)
-  , C (..)
     -- * Special Registers
   , A (..), F (..), I (..), R (..)
+    -- * 16-Bit Registers
   , BC (..), DE (..), HL (..)
   , AF (..), SP (..), PC (..)
     -- * Shadow Registers
@@ -15,6 +15,8 @@ module Z80.Operands
     -- * Conditions
   , Condition (..)
   , Z (..), NZ (..), NC (..)
+    -- * Combined Register / Condition
+  , C (..)
     -- * Addresses
   , Location
   ) where
