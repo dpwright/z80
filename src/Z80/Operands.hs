@@ -3,6 +3,7 @@
 module Z80.Operands
   ( -- * Generic Registers
     Reg8 (..)
+  , C (..)
     -- * Special Registers
   , A (..), F (..), I (..), R (..)
   , BC (..), DE (..), HL (..)
@@ -17,7 +18,7 @@ module Z80.Operands
 
 import Data.Word
 
-data Reg8  = B | C | D | E | H | L deriving (Eq, Show)
+data Reg8  = B | D | E | H | L deriving (Eq, Show)
 
 -- Separating A from the other 8-bit registers allows me to define
 -- certain operations that *only* work with the accumulator, but at
@@ -32,6 +33,11 @@ data HL = HL deriving (Eq, Show)
 data AF = AF deriving (Eq, Show)
 data SP = SP deriving (Eq, Show)
 data PC = PC deriving (Eq, Show)
+
+-- | C is both the name of one of the 8-bit registers *and* a jump condition.
+-- We define it separately and quietly ignore the fact that it might mean two
+-- completely different things...
+data C  = C deriving (Eq, Show)
 
 data AF' = AF' deriving (Eq, Show)
 
