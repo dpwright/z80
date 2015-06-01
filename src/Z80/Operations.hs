@@ -73,6 +73,17 @@ module Z80.Operations
   , reti
   , retn
   , rst
+    -- * Input and Output Group
+  , in_
+  , ini
+  , inir
+  , ind
+  , indr
+  , out
+  , outi
+  , otir
+  , outd
+  , otdr
   ) where
 
 import Data.Bits hiding (xor, bit)
@@ -723,6 +734,46 @@ rst p = db $ pack [0x3 .<. 6 .|. encodeMemLoc p .<. 3 .|. 0x7] where
   encodeMemLoc 0x30 = 0x6 -- 110
   encodeMemLoc 0x38 = 0x7 -- 111
   encodeMemLoc x    = error $ "Invalid parameter to rst: " ++ show x
+
+
+
+class InOut target source where
+  in_ :: target -> source -> Z80ASM
+  out :: source -> target -> Z80ASM
+
+instance (Word8 ~ n) => InOut A [n] where
+  in_ A [n] = db $ pack [0xdb, n]
+  in_ _ x   = derefError x
+  out [n] A = db $ pack [0xd3, n]
+  out x   _ = derefError x
+
+instance InOut Reg8 [C] where
+  in_ r [C] = db $ pack [0xeb, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
+  in_ _ x   = derefError x
+  out [C] r = db $ pack [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3 .|. 0x1]
+  out x   _ = derefError x
+instance InOut A [C] where
+  in_ r [C] = db $ pack [0xeb, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
+  in_ _ x   = derefError x
+  out [C] r = db $ pack [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3 .|. 0x1]
+  out x   _ = derefError x
+instance InOut C [C] where
+  in_ r [C] = db $ pack [0xeb, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
+  in_ _ x   = derefError x
+  out [C] r = db $ pack [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3 .|. 0x1]
+  out x   _ = derefError x
+
+ini, inir, ind, indr :: Z80ASM
+ini  = db $ pack [0xed, 0xa2]
+inir = db $ pack [0xed, 0xb2]
+ind  = db $ pack [0xed, 0xaa]
+indr = db $ pack [0xed, 0xba]
+
+outi, otir, outd, otdr :: Z80ASM
+outi = db $ pack [0xed, 0xa3]
+otir = db $ pack [0xed, 0xb3]
+outd = db $ pack [0xed, 0xab]
+otdr = db $ pack [0xed, 0xbb]
 
 {- -------- INTERNAL UTILITIES -------- -}
 
