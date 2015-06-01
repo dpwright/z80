@@ -67,6 +67,12 @@ module Z80.Operations
   , djnz
   , ($-)
   , ($+)
+    -- * Call and Return Group
+  , call
+  , ret
+  , reti
+  , retn
+  , rst
   ) where
 
 import Data.Bits hiding (xor, bit)
@@ -685,6 +691,38 @@ djnz = relative >=> \a -> db $ pack [0x10, a-2]
 ($-), ($+) :: (Word16 -> Z80ASM) -> Word16 -> Z80ASM
 op $- a = op . subtract a =<< label
 op $+ a = op . (+ a) =<< label
+
+
+
+class Call p r where
+  call :: p -> r
+instance (nn ~ Word16) => Call nn Z80ASM where
+  call nn = db $ pack [0xcd, lo nn, hi nn]
+instance (a ~ Word16, Cond cc) => Call cc (a -> Z80ASM) where
+  call cc = \nn -> db $ pack [0x3 .<. 6 .|. encodeCondition cc .<. 3 .|. 0x4, lo nn, hi nn]
+
+class Return t where
+  ret :: t
+instance Return Z80ASM where
+  ret = db $ pack [0xc9]
+instance (Cond cc) => Return (cc -> Z80ASM) where
+  ret = \cc -> db $ pack [0x3 .<. 6 .|. encodeCondition cc .<. 3]
+
+reti, retn :: Z80ASM
+reti = db $ pack [0xed, 0x4d]
+retn = db $ pack [0xed, 0x45]
+
+rst :: Word8 -> Z80ASM
+rst p = db $ pack [0x3 .<. 6 .|. encodeMemLoc p .<. 3 .|. 0x7] where
+  encodeMemLoc 0x00 = 0x0 -- 000
+  encodeMemLoc 0x08 = 0x1 -- 001
+  encodeMemLoc 0x10 = 0x2 -- 010
+  encodeMemLoc 0x18 = 0x3 -- 011
+  encodeMemLoc 0x20 = 0x4 -- 100
+  encodeMemLoc 0x28 = 0x5 -- 101
+  encodeMemLoc 0x30 = 0x6 -- 110
+  encodeMemLoc 0x38 = 0x7 -- 111
+  encodeMemLoc x    = error $ "Invalid parameter to rst: " ++ show x
 
 {- -------- INTERNAL UTILITIES -------- -}
 

@@ -176,5 +176,14 @@ main = defaultMain $ testGroup "Tests" [
   , testCase "JR Z,e"       $ jr Z $+ 5            $?= [0x28, 3]
   , testCase "JR NZ,e"      $ pad 4 (jr NZ $- 4)   $?= [0, 0, 0, 0, 0x20, -6]
   , testCase "DJNZ"         $ djnz $+ 5            $?= [0x10, 3]
+  ],
+  testGroup "Call and Return Group"
+  [ testCase "CALL nn"      $ call 0x2135          $?= [0xcd, 0x35, 0x21]
+  , testCase "CALL cc,nn"   $ call NC 0x2135       $?= [0xd4, 0x35, 0x21]
+  , testCase "RET"          $ ret                  $?= [0xc9]
+  , testCase "RET cc"       $ ret M                $?= [0xf8]
+  , testCase "RETI"         $ reti                 $?= [0xed, 0x4d]
+  , testCase "RETN"         $ retn                 $?= [0xed, 0x45]
+  , testCase "RST p"        $ rst 0x18             $?= [0xdf]
   ]
   ]
