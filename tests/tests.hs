@@ -6,11 +6,12 @@ import Data.Word
 
 import Z80
 
+import Control.Monad  (void)
 import Prelude hiding (and, or)
 
 ($?=) :: Z80ASM -> [Word8] -> Assertion
 asm $?= bytes = extractBytes asm @?= pack bytes
-  where extractBytes = asmData . org 0
+  where extractBytes = asmData . org 0 . void
 
 pad :: Int -> Z80ASM -> Z80ASM
 pad n asm = db (BS.replicate n 0) >> asm
