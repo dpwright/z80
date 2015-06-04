@@ -5,11 +5,14 @@ module Z80.Assembler
   , Z80ASM
   , ASMBlock (..)
   , org
+  , code
   , db
   , equ
   , label ) where
 
-import Data.ByteString as BS
+import Data.Word
+import qualified Data.ByteString as BS
+import Data.ByteString (ByteString)
 
 import Control.Monad.RWS
 
@@ -27,6 +30,11 @@ data ASMBlock
   { asmOrg  :: Location
   , asmData :: ByteString
   } deriving (Eq, Show)
+
+code :: [Word8] -> Z80ASM
+code bytes = Z80 $ do
+  tell $ BS.pack bytes
+  modify (+ fromIntegral (length bytes))
 
 db :: ByteString -> Z80ASM
 db bs = Z80 $ do
