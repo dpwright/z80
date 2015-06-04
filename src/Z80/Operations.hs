@@ -100,47 +100,47 @@ class Load tgt src where
   ld :: tgt -> src -> Z80ASM
 
 instance Load Reg8 Reg8 where
-  ld r r' = db $ pack [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
+  ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
 instance Load Reg8 C where
-  ld r r' = db $ pack [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
+  ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
 instance Load C Reg8 where
-  ld r r' = db $ pack [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
+  ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
 instance Load A Reg8 where
-  ld r r' = db $ pack [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
+  ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
 instance Load Reg8 A where
-  ld r r' = db $ pack [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
+  ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
 instance Load A C where
-  ld r r' = db $ pack [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
+  ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
 instance Load C A where
-  ld r r' = db $ pack [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
+  ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
 
 instance (n ~ Word16) => Load Reg8 n where
-  ld r n = db $ pack [encodeReg8 r .<. 3 .|. 6, fromIntegral n]
+  ld r n = code [encodeReg8 r .<. 3 .|. 6, fromIntegral n]
 instance (n ~ Word16) => Load A n where
-  ld r n = db $ pack [encodeReg8 r .<. 3 .|. 6, fromIntegral n]
+  ld r n = code [encodeReg8 r .<. 3 .|. 6, fromIntegral n]
 instance (n ~ Word16) => Load C n where
-  ld r n = db $ pack [encodeReg8 r .<. 3 .|. 6, fromIntegral n]
+  ld r n = code [encodeReg8 r .<. 3 .|. 6, fromIntegral n]
 
 instance Load Reg8 [HL] where
-  ld r [HL] = db $ pack [1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6]
+  ld r [HL] = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6]
   ld _ x = derefError x
 instance Load A [HL] where
-  ld r [HL] = db $ pack [1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6]
+  ld r [HL] = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6]
   ld _ x = derefError x
 instance Load C [HL] where
-  ld r [HL] = db $ pack [1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6]
+  ld r [HL] = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6]
   ld _ x = derefError x
 instance Load [HL] Reg8 where
-  ld [HL] r = db $ pack [1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r]
+  ld [HL] r = code [1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r]
   ld x _ = derefError x
 instance Load [HL] A where
-  ld [HL] r = db $ pack [1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r]
+  ld [HL] r = code [1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r]
   ld x _ = derefError x
 instance Load [HL] C where
-  ld [HL] r = db $ pack [1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r]
+  ld [HL] r = code [1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r]
   ld x _ = derefError x
 instance (n ~ Word8) => Load [HL] n where
-  ld [HL] n = db $ pack [0x36, n]
+  ld [HL] n = code [0x36, n]
   ld x _ = derefError x
 
 instance Load Reg8 [RegIx] where
@@ -180,78 +180,79 @@ instance (n ~ Word8) => Load [RegIx] n where
   ld x   _ = derefError x
 
 instance Load A [BC] where
-  ld A [BC] = db $ pack [0x0a]
+  ld A [BC] = code [0x0a]
   ld _ x = derefError x
 instance Load A [DE] where
-  ld A [DE] = db $ pack [0x1a]
+  ld A [DE] = code [0x1a]
   ld _ x = derefError x
 instance Load [BC] A where
-  ld [BC] A = db $ pack [0x02]
+  ld [BC] A = code [0x02]
   ld x _ = derefError x
 instance Load [DE] A where
-  ld [DE] A = db $ pack [0x12]
+  ld [DE] A = code [0x12]
   ld x _ = derefError x
 
 instance (nn ~ Word16) => Load A [nn] where
-  ld A [nn] = db $ pack [0x3a, lo nn, hi nn]
+  ld A [nn] = code [0x3a, lo nn, hi nn]
   ld _ x = derefError x
 instance (nn ~ Word16) => Load [nn] A where
-  ld [nn] A = db $ pack [0x32, lo nn, hi nn]
+  ld [nn] A = code [0x32, lo nn, hi nn]
   ld x _ = derefError x
 
 instance Load A I where
-  ld A I = db $ pack [0xed, 0x57]
+  ld A I = code [0xed, 0x57]
 instance Load I A where
-  ld I A = db $ pack [0xed, 0x47]
+  ld I A = code [0xed, 0x47]
 instance Load A R where
-  ld A R = db $ pack [0xed, 0x5f]
+  ld A R = code [0xed, 0x5f]
 instance Load R A where
-  ld R A = db $ pack [0xed, 0x4f]
+  ld R A = code [0xed, 0x4f]
 
 instance (Reg16 dd, nn ~ Word16) => Load dd nn where
-  ld dd nn = db $ pack [encodeReg16 dd .<. 4 .|. 0x01, lo nn, hi nn]
+  ld dd nn = code [encodeReg16 dd .<. 4 .|. 0x01, lo nn, hi nn]
 instance (nn ~ Word16) => Load HL nn where
-  ld dd nn = db $ pack [encodeReg16 dd .<. 4 .|. 0x01, lo nn, hi nn]
+  ld dd nn = code [encodeReg16 dd .<. 4 .|. 0x01, lo nn, hi nn]
 instance (nn ~ Word16) => Load SP nn where
-  ld dd nn = db $ pack [encodeReg16 dd .<. 4 .|. 0x01, lo nn, hi nn]
+  ld dd nn = code [encodeReg16 dd .<. 4 .|. 0x01, lo nn, hi nn]
 
 instance (nn ~ Word16) => Load RegIx nn where
-  ld i nn = db $ pack [encodeReg16 i, 0x21, lo nn, hi nn]
+  ld i nn = code [encodeReg16 i, 0x21, lo nn, hi nn]
 
 instance (nn ~ Word16) => Load HL [nn] where
-  ld HL [nn] = db $ pack [0x2a, lo nn, hi nn]
+  ld HL [nn] = code [0x2a, lo nn, hi nn]
   ld _ x = derefError x
 instance (nn ~ Word16) => Load [nn] HL where
-  ld [nn] HL = db $ pack [0x22, lo nn, hi nn]
+  ld [nn] HL = code [0x22, lo nn, hi nn]
   ld x _ = derefError x
 
 -- NOTE Z80 documentation says you should be able to pass HL here, but that
 --      seems to clash with the previous instance, which is HL-specific?
 instance (Reg16 dd, nn ~ Word16) => Load dd [nn] where
-  ld dd [nn] = db $ pack [0xed, 0x01 .<. 6 .|. encodeReg16 dd .<. 4 .|. 0xb, lo nn, hi nn]
+  ld dd [nn] = code [0xed, 0x01 .<. 6 .|. encodeReg16 dd .<. 4 .|. 0xb, lo nn, hi nn]
   ld _ x = derefError x
 instance (nn ~ Word16) => Load SP [nn] where
-  ld dd [nn] = db $ pack [0xed, 0x01 .<. 6 .|. encodeReg16 dd .<. 4 .|. 0xb, lo nn, hi nn]
+
+  ld dd [nn] = code [0xed, 0x01 .<. 6 .|. encodeReg16 dd .<. 4 .|. 0xb, lo nn, hi nn]
   ld _ x = derefError x
 instance (Reg16 dd, nn ~ Word16) => Load [nn] dd where
-  ld [nn] dd = db $ pack [0xed, 0x01 .<. 6 .|. encodeReg16 dd .<. 4 .|. 0x3, lo nn, hi nn]
+  ld [nn] dd = code [0xed, 0x01 .<. 6 .|. encodeReg16 dd .<. 4 .|. 0x3, lo nn, hi nn]
   ld x _ = derefError x
 instance (nn ~ Word16) => Load [nn] SP where
-  ld [nn] dd = db $ pack [0xed, 0x01 .<. 6 .|. encodeReg16 dd .<. 4 .|. 0x3, lo nn, hi nn]
+  ld [nn] dd = code [0xed, 0x01 .<. 6 .|. encodeReg16 dd .<. 4 .|. 0x3, lo nn, hi nn]
   ld x _ = derefError x
 
 instance (nn ~ Word16) => Load RegIx [nn] where
-  ld i [nn] = db $ pack [encodeReg16 i, 0x2a, lo nn, hi nn]
+  ld i [nn] = code [encodeReg16 i, 0x2a, lo nn, hi nn]
   ld _ x    = derefError x
 instance (nn ~ Word16) => Load [nn] RegIx where
-  ld [nn] i = db $ pack [encodeReg16 i, 0x22, lo $ fromIntegral nn, hi $ fromIntegral nn]
+  ld [nn] i = code [encodeReg16 i, 0x22, lo $ fromIntegral nn, hi $ fromIntegral nn]
   ld x _    = derefError x
 
 instance Load SP HL where
-  ld SP HL = db $ pack [0xf9]
+  ld SP HL = code [0xf9]
 
 instance Load SP RegIx where
-  ld SP i = db $ pack [encodeReg16 i, 0xf9]
+  ld SP i = code [encodeReg16 i, 0xf9]
 
 
 
@@ -260,17 +261,17 @@ class Stack reg where
   pop  :: reg -> Z80ASM
 
 instance (Reg16 qq) => Stack qq where
-  push qq = db $ pack [0x3 .<. 6 .|. encodeReg16 qq .<. 4 .|. 0x5]
-  pop  qq = db $ pack [0x3 .<. 6 .|. encodeReg16 qq .<. 4 .|. 0x1]
+  push qq = code [0x3 .<. 6 .|. encodeReg16 qq .<. 4 .|. 0x5]
+  pop  qq = code [0x3 .<. 6 .|. encodeReg16 qq .<. 4 .|. 0x1]
 instance Stack HL where
-  push qq = db $ pack [0x3 .<. 6 .|. encodeReg16 qq .<. 4 .|. 0x5]
-  pop  qq = db $ pack [0x3 .<. 6 .|. encodeReg16 qq .<. 4 .|. 0x1]
+  push qq = code [0x3 .<. 6 .|. encodeReg16 qq .<. 4 .|. 0x5]
+  pop  qq = code [0x3 .<. 6 .|. encodeReg16 qq .<. 4 .|. 0x1]
 instance Stack AF where
-  push qq = db $ pack [0x3 .<. 6 .|. encodeReg16 qq .<. 4 .|. 0x5]
-  pop  qq = db $ pack [0x3 .<. 6 .|. encodeReg16 qq .<. 4 .|. 0x1]
+  push qq = code [0x3 .<. 6 .|. encodeReg16 qq .<. 4 .|. 0x5]
+  pop  qq = code [0x3 .<. 6 .|. encodeReg16 qq .<. 4 .|. 0x1]
 instance Stack RegIx where
-  push i = db $ pack [encodeReg16 i, 0xe5]
-  pop  i = db $ pack [encodeReg16 i, 0xe1]
+  push i = code [encodeReg16 i, 0xe5]
+  pop  i = code [encodeReg16 i, 0xe1]
 
 
 
@@ -278,45 +279,45 @@ class Exchange reg reg' where
   ex :: reg -> reg' -> Z80ASM
 
 instance Exchange DE HL where
-  ex DE HL = db $ pack [0xeb]
+  ex DE HL = code [0xeb]
 
 instance Exchange AF AF' where
-  ex AF AF' = db $ pack [0x08]
+  ex AF AF' = code [0x08]
 
 instance Exchange [SP] HL where
-  ex [SP] HL = db $ pack [0xe3]
+  ex [SP] HL = code [0xe3]
   ex x    _  = derefError x
 
 instance Exchange [SP] RegIx where
-  ex [SP] i = db $ pack [encodeReg16 i, 0xe3]
+  ex [SP] i = code [encodeReg16 i, 0xe3]
   ex x    _ = derefError x
 
 exx :: Z80ASM
-exx = db $ pack [0xd9]
+exx = code [0xd9]
 
 ldi :: Z80ASM
-ldi = db $ pack [0xed, 0xa0]
+ldi = code [0xed, 0xa0]
 
 ldir :: Z80ASM
-ldir = db $ pack [0xed, 0xb0]
+ldir = code [0xed, 0xb0]
 
 ldd :: Z80ASM
-ldd = db $ pack [0xed, 0xa8]
+ldd = code [0xed, 0xa8]
 
 lddr :: Z80ASM
-lddr = db $ pack [0xed, 0xb8]
+lddr = code [0xed, 0xb8]
 
 cpi :: Z80ASM
-cpi = db $ pack [0xed, 0xa1]
+cpi = code [0xed, 0xa1]
 
 cpir :: Z80ASM
-cpir = db $ pack [0xed, 0xb1]
+cpir = code [0xed, 0xb1]
 
 cpd :: Z80ASM
-cpd = db $ pack [0xed, 0xa9]
+cpd = code [0xed, 0xa9]
 
 cpdr :: Z80ASM
-cpdr = db $ pack [0xed, 0xb9]
+cpdr = code [0xed, 0xb9]
 
 
 
@@ -328,59 +329,59 @@ class Arithmetic8 operand where
   cp  :: operand -> Z80ASM
 
 instance Arithmetic8 A where
-  sub   r = db $ pack [0x1 .<. 7 .|. 0x2 .<. 3 .|. encodeReg8 r]
-  and   r = db $ pack [0x1 .<. 7 .|. 0x4 .<. 3 .|. encodeReg8 r]
-  or    r = db $ pack [0x1 .<. 7 .|. 0x6 .<. 3 .|. encodeReg8 r]
-  xor   r = db $ pack [0x1 .<. 7 .|. 0x5 .<. 3 .|. encodeReg8 r]
-  cp    r = db $ pack [0x1 .<. 7 .|. 0x7 .<. 3 .|. encodeReg8 r]
+  sub   r = code [0x1 .<. 7 .|. 0x2 .<. 3 .|. encodeReg8 r]
+  and   r = code [0x1 .<. 7 .|. 0x4 .<. 3 .|. encodeReg8 r]
+  or    r = code [0x1 .<. 7 .|. 0x6 .<. 3 .|. encodeReg8 r]
+  xor   r = code [0x1 .<. 7 .|. 0x5 .<. 3 .|. encodeReg8 r]
+  cp    r = code [0x1 .<. 7 .|. 0x7 .<. 3 .|. encodeReg8 r]
 
 instance Arithmetic8 C where
-  sub   r = db $ pack [0x1 .<. 7 .|. 0x2 .<. 3 .|. encodeReg8 r]
-  and   r = db $ pack [0x1 .<. 7 .|. 0x4 .<. 3 .|. encodeReg8 r]
-  or    r = db $ pack [0x1 .<. 7 .|. 0x6 .<. 3 .|. encodeReg8 r]
-  xor   r = db $ pack [0x1 .<. 7 .|. 0x5 .<. 3 .|. encodeReg8 r]
-  cp    r = db $ pack [0x1 .<. 7 .|. 0x7 .<. 3 .|. encodeReg8 r]
+  sub   r = code [0x1 .<. 7 .|. 0x2 .<. 3 .|. encodeReg8 r]
+  and   r = code [0x1 .<. 7 .|. 0x4 .<. 3 .|. encodeReg8 r]
+  or    r = code [0x1 .<. 7 .|. 0x6 .<. 3 .|. encodeReg8 r]
+  xor   r = code [0x1 .<. 7 .|. 0x5 .<. 3 .|. encodeReg8 r]
+  cp    r = code [0x1 .<. 7 .|. 0x7 .<. 3 .|. encodeReg8 r]
 
 instance Arithmetic8 Reg8 where
-  sub   r = db $ pack [0x1 .<. 7 .|. 0x2 .<. 3 .|. encodeReg8 r]
-  and   r = db $ pack [0x1 .<. 7 .|. 0x4 .<. 3 .|. encodeReg8 r]
-  or    r = db $ pack [0x1 .<. 7 .|. 0x6 .<. 3 .|. encodeReg8 r]
-  xor   r = db $ pack [0x1 .<. 7 .|. 0x5 .<. 3 .|. encodeReg8 r]
-  cp    r = db $ pack [0x1 .<. 7 .|. 0x7 .<. 3 .|. encodeReg8 r]
+  sub   r = code [0x1 .<. 7 .|. 0x2 .<. 3 .|. encodeReg8 r]
+  and   r = code [0x1 .<. 7 .|. 0x4 .<. 3 .|. encodeReg8 r]
+  or    r = code [0x1 .<. 7 .|. 0x6 .<. 3 .|. encodeReg8 r]
+  xor   r = code [0x1 .<. 7 .|. 0x5 .<. 3 .|. encodeReg8 r]
+  cp    r = code [0x1 .<. 7 .|. 0x7 .<. 3 .|. encodeReg8 r]
 
 instance (n ~ Word8) => Arithmetic8 n where
-  sub   n = db $ pack [0xd6, n]
-  and   n = db $ pack [0xe6, n]
-  or    n = db $ pack [0xf6, n]
-  xor   n = db $ pack [0xee, n]
-  cp    n = db $ pack [0xfe, n]
+  sub   n = code [0xd6, n]
+  and   n = code [0xe6, n]
+  or    n = code [0xf6, n]
+  xor   n = code [0xee, n]
+  cp    n = code [0xfe, n]
 
 instance Arithmetic8 [HL] where
-  sub   [HL] = db $ pack [0x96]
+  sub   [HL] = code [0x96]
   sub   x    = derefError x
-  and   [HL] = db $ pack [0xa6]
+  and   [HL] = code [0xa6]
   and   x    = derefError x
-  or    [HL] = db $ pack [0xb6]
+  or    [HL] = code [0xb6]
   or    x    = derefError x
-  xor   [HL] = db $ pack [0xae]
+  xor   [HL] = code [0xae]
   xor   x    = derefError x
-  cp    [HL] = db $ pack [0xbe]
+  cp    [HL] = code [0xbe]
   cp    x    = derefError x
 
 instance Arithmetic8 [RegIx] where
-  sub   [i :+ d] = db $ pack [encodeOrError i, 0x96, d]
+  sub   [i :+ d] = code [encodeOrError i, 0x96, d]
   sub   [i]      = sub [i+0]
   sub   x        = derefError x
-  and   [i :+ d] = db $ pack [encodeOrError i, 0xa6, d]
+  and   [i :+ d] = code [encodeOrError i, 0xa6, d]
   and   [i]      = and [i+0]
   and   x        = derefError x
-  or    [i :+ d] = db $ pack [encodeOrError i, 0xb6, d]
+  or    [i :+ d] = code [encodeOrError i, 0xb6, d]
   or    [i]      = or [i+0]
   or    x        = derefError x
-  xor   [i :+ d] = db $ pack [encodeOrError i, 0xae, d]
+  xor   [i :+ d] = code [encodeOrError i, 0xae, d]
   xor   [i]      = xor [i+0]
   xor   x        = derefError x
-  cp    [i :+ d] = db $ pack [encodeOrError i, 0xbe, d]
+  cp    [i :+ d] = code [encodeOrError i, 0xbe, d]
   cp    [i]      = cp [i+0]
   cp    x        = derefError x
 
@@ -389,64 +390,64 @@ class Inc operand where
   dec :: operand -> Z80ASM
 
 instance Inc A where
-  inc r = db $ pack [encodeReg8 r .<. 3 .|. 0x4]
-  dec r = db $ pack [encodeReg8 r .<. 3 .|. 0x5]
+  inc r = code [encodeReg8 r .<. 3 .|. 0x4]
+  dec r = code [encodeReg8 r .<. 3 .|. 0x5]
 
 instance Inc C where
-  inc r = db $ pack [encodeReg8 r .<. 3 .|. 0x4]
-  dec r = db $ pack [encodeReg8 r .<. 3 .|. 0x5]
+  inc r = code [encodeReg8 r .<. 3 .|. 0x4]
+  dec r = code [encodeReg8 r .<. 3 .|. 0x5]
 
 instance Inc Reg8 where
-  inc r = db $ pack [encodeReg8 r .<. 3 .|. 0x4]
-  dec r = db $ pack [encodeReg8 r .<. 3 .|. 0x5]
+  inc r = code [encodeReg8 r .<. 3 .|. 0x4]
+  dec r = code [encodeReg8 r .<. 3 .|. 0x5]
 
 instance Inc [HL] where
-  inc [HL] = db $ pack [0x34]
+  inc [HL] = code [0x34]
   inc x    = derefError x
-  dec [HL] = db $ pack [0x35]
+  dec [HL] = code [0x35]
   dec x    = derefError x
 
 instance Inc [RegIx] where
-  inc [i :+ d] = db $ pack [encodeOrError i, 0x34, d]
+  inc [i :+ d] = code [encodeOrError i, 0x34, d]
   inc [i]      = inc [i+0]
   inc x        = derefError x
-  dec [i :+ d] = db $ pack [encodeOrError i, 0x35, d]
+  dec [i :+ d] = code [encodeOrError i, 0x35, d]
   dec [i]      = dec [i+0]
   dec x        = derefError x
 
 
 
 daa :: Z80ASM
-daa = db $ pack [0x27]
+daa = code [0x27]
 
 cpl :: Z80ASM
-cpl = db $ pack [0x2f]
+cpl = code [0x2f]
 
 neg :: Z80ASM
-neg = db $ pack [0xed, 0x44]
+neg = code [0xed, 0x44]
 
 ccf :: Z80ASM
-ccf = db $ pack [0x3f]
+ccf = code [0x3f]
 
 scf :: Z80ASM
-scf = db $ pack [0x37]
+scf = code [0x37]
 
 nop :: Z80ASM
-nop = db $ pack [0x00]
+nop = code [0x00]
 
 halt :: Z80ASM
-halt = db $ pack [0x76]
+halt = code [0x76]
 
 di :: Z80ASM
-di = db $ pack [0xf3]
+di = code [0xf3]
 
 ei :: Z80ASM
-ei = db $ pack [0xfb]
+ei = code [0xfb]
 
 im :: Word8 -> Z80ASM
-im 0 = db $ pack [0xed, 0x46]
-im 1 = db $ pack [0xed, 0x56]
-im 2 = db $ pack [0xed, 0x5e]
+im 0 = code [0xed, 0x46]
+im 1 = code [0xed, 0x56]
+im 2 = code [0xed, 0x5e]
 im x = error $ "Invalid interrupt mode: " ++ show x
 
 
@@ -459,91 +460,91 @@ class CarryArithmetic target operand where
   sbc :: target -> operand -> Z80ASM
 
 instance Arithmetic A A where
-  add A r = db $ pack [0x1 .<. 7 .|. encodeReg8 r]
+  add A r = code [0x1 .<. 7 .|. encodeReg8 r]
 
 instance CarryArithmetic A A where
-  adc A r = db $ pack [0x1 .<. 7 .|. 0x1 .<. 3 .|. encodeReg8 r]
-  sbc A r = db $ pack [0x1 .<. 7 .|. 0x3 .<. 3 .|. encodeReg8 r]
+  adc A r = code [0x1 .<. 7 .|. 0x1 .<. 3 .|. encodeReg8 r]
+  sbc A r = code [0x1 .<. 7 .|. 0x3 .<. 3 .|. encodeReg8 r]
 
 instance Arithmetic A C where
-  add A r = db $ pack [0x1 .<. 7 .|. encodeReg8 r]
+  add A r = code [0x1 .<. 7 .|. encodeReg8 r]
 
 instance CarryArithmetic A C where
-  adc A r = db $ pack [0x1 .<. 7 .|. 0x1 .<. 3 .|. encodeReg8 r]
-  sbc A r = db $ pack [0x1 .<. 7 .|. 0x3 .<. 3 .|. encodeReg8 r]
+  adc A r = code [0x1 .<. 7 .|. 0x1 .<. 3 .|. encodeReg8 r]
+  sbc A r = code [0x1 .<. 7 .|. 0x3 .<. 3 .|. encodeReg8 r]
 
 instance Arithmetic A Reg8 where
-  add A r = db $ pack [0x1 .<. 7 .|. encodeReg8 r]
+  add A r = code [0x1 .<. 7 .|. encodeReg8 r]
 
 instance CarryArithmetic A Reg8 where
-  adc A r = db $ pack [0x1 .<. 7 .|. 0x1 .<. 3 .|. encodeReg8 r]
-  sbc A r = db $ pack [0x1 .<. 7 .|. 0x3 .<. 3 .|. encodeReg8 r]
+  adc A r = code [0x1 .<. 7 .|. 0x1 .<. 3 .|. encodeReg8 r]
+  sbc A r = code [0x1 .<. 7 .|. 0x3 .<. 3 .|. encodeReg8 r]
 
 instance (n ~ Word8) => Arithmetic A n where
-  add A n = db $ pack [0xc6, n]
+  add A n = code [0xc6, n]
 
 instance (n ~ Word8) => CarryArithmetic A n where
-  adc A n = db $ pack [0xce, n]
-  sbc A n = db $ pack [0xde, n]
+  adc A n = code [0xce, n]
+  sbc A n = code [0xde, n]
 
 instance Arithmetic A [HL] where
-  add A [HL] = db $ pack [0x86]
+  add A [HL] = code [0x86]
   add A x    = derefError x
 
 instance CarryArithmetic A [HL] where
-  adc A [HL] = db $ pack [0x8e]
+  adc A [HL] = code [0x8e]
   adc A x    = derefError x
-  sbc A [HL] = db $ pack [0x9e]
+  sbc A [HL] = code [0x9e]
   sbc A x    = derefError x
 
 instance Arithmetic A [RegIx] where
-  add A [i :+ d] = db $ pack [encodeOrError i, 0x86, d]
+  add A [i :+ d] = code [encodeOrError i, 0x86, d]
   add A [i]      = add A [i+0]
   add A x        = derefError x
 
 instance CarryArithmetic A [RegIx] where
-  adc A [i :+ d] = db $ pack [encodeOrError i, 0x8e, d]
+  adc A [i :+ d] = code [encodeOrError i, 0x8e, d]
   adc A [i]      = adc A [i+0]
   adc A x        = derefError x
-  sbc A [i :+ d] = db $ pack [encodeOrError i, 0x9e, d]
+  sbc A [i :+ d] = code [encodeOrError i, 0x9e, d]
   sbc A [i]      = sbc A [i+0]
   sbc A x        = derefError x
 
 instance (Reg16 ss) => Arithmetic HL ss where
-  add HL ss = db $ pack [encodeReg16 ss .<. 4 .|. 0x09]
+  add HL ss = code [encodeReg16 ss .<. 4 .|. 0x09]
 
 instance (Reg16 ss) => CarryArithmetic HL ss where
-  adc HL ss = db $ pack [0xed, 0x40 .|. encodeReg16 ss .<. 4 .|. 0x0a]
-  sbc HL ss = db $ pack [0xed, 0x40 .|. encodeReg16 ss .<. 4 .|. 0x2]
+  adc HL ss = code [0xed, 0x40 .|. encodeReg16 ss .<. 4 .|. 0x0a]
+  sbc HL ss = code [0xed, 0x40 .|. encodeReg16 ss .<. 4 .|. 0x2]
 
 instance (Reg16 ss, Show ss) => Arithmetic RegIx ss where
-  add i pp = db $ pack [encodeReg16 i, encodeReg16 pp .<. 4 .|. 0x09]
+  add i pp = code [encodeReg16 i, encodeReg16 pp .<. 4 .|. 0x09]
 instance Arithmetic RegIx SP where
-  add i pp = db $ pack [encodeReg16 i, encodeReg16 pp .<. 4 .|. 0x09]
+  add i pp = code [encodeReg16 i, encodeReg16 pp .<. 4 .|. 0x09]
 instance Arithmetic RegIx RegIx where
-  add i i' | i == i' = db $ pack [encodeReg16 i, 0x2 .<. 4 .|. 0x09]
+  add i i' | i == i' = code [encodeReg16 i, 0x2 .<. 4 .|. 0x09]
   add i  i'          = error $ "Invalid operation: add " ++ show i ++ " " ++ show i'
 
 instance (Reg16 ss) => Inc ss where
-  inc r = db $ pack [encodeReg16 r .<. 4 .|. 0x3]
-  dec r = db $ pack [encodeReg16 r .<. 4 .|. 0xb]
+  inc r = code [encodeReg16 r .<. 4 .|. 0x3]
+  dec r = code [encodeReg16 r .<. 4 .|. 0xb]
 instance Inc HL where
-  inc r = db $ pack [encodeReg16 r .<. 4 .|. 0x3]
-  dec r = db $ pack [encodeReg16 r .<. 4 .|. 0xb]
+  inc r = code [encodeReg16 r .<. 4 .|. 0x3]
+  dec r = code [encodeReg16 r .<. 4 .|. 0xb]
 instance Inc SP where
-  inc r = db $ pack [encodeReg16 r .<. 4 .|. 0x3]
-  dec r = db $ pack [encodeReg16 r .<. 4 .|. 0xb]
+  inc r = code [encodeReg16 r .<. 4 .|. 0x3]
+  dec r = code [encodeReg16 r .<. 4 .|. 0xb]
 instance Inc RegIx where
-  inc i = db $ pack [encodeReg16 i, 0x23]
-  dec i = db $ pack [encodeReg16 i, 0x2b]
+  inc i = code [encodeReg16 i, 0x23]
+  dec i = code [encodeReg16 i, 0x2b]
 
 
 
 rlca, rla, rrca, rra :: Z80ASM
-rlca = db $ pack [0x07]
-rla  = db $ pack [0x17]
-rrca = db $ pack [0x0f]
-rra  = db $ pack [0x1f]
+rlca = code [0x07]
+rla  = code [0x17]
+rrca = code [0x0f]
+rra  = code [0x1f]
 
 class RotateShift r where
   rlc :: r -> Z80ASM
@@ -555,72 +556,72 @@ class RotateShift r where
   srl :: r -> Z80ASM
 
 instance RotateShift Reg8 where
-  rlc r = db $ pack [0xcb, encodeReg8 r]
-  rl  r = db $ pack [0xcb, 0x2 .<. 3 .|. encodeReg8 r]
-  rrc r = db $ pack [0xcb, 0x1 .<. 3 .|. encodeReg8 r]
-  rr  r = db $ pack [0xcb, 0x3 .<. 3 .|. encodeReg8 r]
-  sla r = db $ pack [0xcb, 0x4 .<. 3 .|. encodeReg8 r]
-  sra r = db $ pack [0xcb, 0x5 .<. 3 .|. encodeReg8 r]
-  srl r = db $ pack [0xcb, 0x7 .<. 3 .|. encodeReg8 r]
+  rlc r = code [0xcb, encodeReg8 r]
+  rl  r = code [0xcb, 0x2 .<. 3 .|. encodeReg8 r]
+  rrc r = code [0xcb, 0x1 .<. 3 .|. encodeReg8 r]
+  rr  r = code [0xcb, 0x3 .<. 3 .|. encodeReg8 r]
+  sla r = code [0xcb, 0x4 .<. 3 .|. encodeReg8 r]
+  sra r = code [0xcb, 0x5 .<. 3 .|. encodeReg8 r]
+  srl r = code [0xcb, 0x7 .<. 3 .|. encodeReg8 r]
 instance RotateShift A where
-  rlc r = db $ pack [0xcb, encodeReg8 r]
-  rl  r = db $ pack [0xcb, 0x2 .<. 3 .|. encodeReg8 r]
-  rrc r = db $ pack [0xcb, 0x1 .<. 3 .|. encodeReg8 r]
-  rr  r = db $ pack [0xcb, 0x3 .<. 3 .|. encodeReg8 r]
-  sla r = db $ pack [0xcb, 0x4 .<. 3 .|. encodeReg8 r]
-  sra r = db $ pack [0xcb, 0x5 .<. 3 .|. encodeReg8 r]
-  srl r = db $ pack [0xcb, 0x7 .<. 3 .|. encodeReg8 r]
+  rlc r = code [0xcb, encodeReg8 r]
+  rl  r = code [0xcb, 0x2 .<. 3 .|. encodeReg8 r]
+  rrc r = code [0xcb, 0x1 .<. 3 .|. encodeReg8 r]
+  rr  r = code [0xcb, 0x3 .<. 3 .|. encodeReg8 r]
+  sla r = code [0xcb, 0x4 .<. 3 .|. encodeReg8 r]
+  sra r = code [0xcb, 0x5 .<. 3 .|. encodeReg8 r]
+  srl r = code [0xcb, 0x7 .<. 3 .|. encodeReg8 r]
 instance RotateShift C where
-  rlc r = db $ pack [0xcb, encodeReg8 r]
-  rl  r = db $ pack [0xcb, 0x2 .<. 3 .|. encodeReg8 r]
-  rrc r = db $ pack [0xcb, 0x1 .<. 3 .|. encodeReg8 r]
-  rr  r = db $ pack [0xcb, 0x3 .<. 3 .|. encodeReg8 r]
-  sla r = db $ pack [0xcb, 0x4 .<. 3 .|. encodeReg8 r]
-  sra r = db $ pack [0xcb, 0x5 .<. 3 .|. encodeReg8 r]
-  srl r = db $ pack [0xcb, 0x7 .<. 3 .|. encodeReg8 r]
+  rlc r = code [0xcb, encodeReg8 r]
+  rl  r = code [0xcb, 0x2 .<. 3 .|. encodeReg8 r]
+  rrc r = code [0xcb, 0x1 .<. 3 .|. encodeReg8 r]
+  rr  r = code [0xcb, 0x3 .<. 3 .|. encodeReg8 r]
+  sla r = code [0xcb, 0x4 .<. 3 .|. encodeReg8 r]
+  sra r = code [0xcb, 0x5 .<. 3 .|. encodeReg8 r]
+  srl r = code [0xcb, 0x7 .<. 3 .|. encodeReg8 r]
 
 instance RotateShift [HL] where
-  rlc [HL] = db $ pack [0xcb, 0x06]
+  rlc [HL] = code [0xcb, 0x06]
   rlc x    = derefError x
-  rl  [HL] = db $ pack [0xcb, 0x16]
+  rl  [HL] = code [0xcb, 0x16]
   rl  x    = derefError x
-  rrc [HL] = db $ pack [0xcb, 0x0e]
+  rrc [HL] = code [0xcb, 0x0e]
   rrc x    = derefError x
-  rr  [HL] = db $ pack [0xcb, 0x1e]
+  rr  [HL] = code [0xcb, 0x1e]
   rr  x    = derefError x
-  sla [HL] = db $ pack [0xcb, 0x26]
+  sla [HL] = code [0xcb, 0x26]
   sla x    = derefError x
-  sra [HL] = db $ pack [0xcb, 0x2e]
+  sra [HL] = code [0xcb, 0x2e]
   sra x    = derefError x
-  srl [HL] = db $ pack [0xcb, 0x3e]
+  srl [HL] = code [0xcb, 0x3e]
   srl x    = derefError x
 
 instance RotateShift [RegIx] where
-  rlc [i:+d] = db $ pack [encodeOrError i, 0xcb, d, 0x06]
+  rlc [i:+d] = code [encodeOrError i, 0xcb, d, 0x06]
   rlc [i]    = rlc [i+0]
   rlc x      = derefError x
-  rl  [i:+d] = db $ pack [encodeOrError i, 0xcb, d, 0x16]
+  rl  [i:+d] = code [encodeOrError i, 0xcb, d, 0x16]
   rl  [i]    = rl  [i+0]
   rl  x      = derefError x
-  rrc [i:+d] = db $ pack [encodeOrError i, 0xcb, d, 0x0e]
+  rrc [i:+d] = code [encodeOrError i, 0xcb, d, 0x0e]
   rrc [i]    = rrc [i+0]
   rrc x      = derefError x
-  rr  [i:+d] = db $ pack [encodeOrError i, 0xcb, d, 0x1e]
+  rr  [i:+d] = code [encodeOrError i, 0xcb, d, 0x1e]
   rr  [i]    = rr  [i+0]
   rr  x      = derefError x
-  sla [i:+d] = db $ pack [encodeOrError i, 0xcb, d, 0x26]
+  sla [i:+d] = code [encodeOrError i, 0xcb, d, 0x26]
   sla [i]    = sla [i+0]
   sla x      = derefError x
-  sra [i:+d] = db $ pack [encodeOrError i, 0xcb, d, 0x2e]
+  sra [i:+d] = code [encodeOrError i, 0xcb, d, 0x2e]
   sra [i]    = sra [i+0]
   sra x      = derefError x
-  srl [i:+d] = db $ pack [encodeOrError i, 0xcb, d, 0x3e]
+  srl [i:+d] = code [encodeOrError i, 0xcb, d, 0x3e]
   srl [i]    = srl [i+0]
   srl x      = derefError x
 
 rld, rrd :: Z80ASM
-rld = db $ pack [0xed, 0x6f]
-rrd = db $ pack [0xed, 0x67]
+rld = code [0xed, 0x6f]
+rrd = code [0xed, 0x67]
 
 
 
@@ -630,36 +631,36 @@ class Bitwise r where
   res :: Word8 -> r -> Z80ASM
 
 instance Bitwise Reg8 where
-  bit b r = db $ pack [0xcb, 0x1 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
-  set b r = db $ pack [0xcb, 0x3 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
-  res b r = db $ pack [0xcb, 0x2 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
+  bit b r = code [0xcb, 0x1 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
+  set b r = code [0xcb, 0x3 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
+  res b r = code [0xcb, 0x2 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
 
 instance Bitwise A where
-  bit b r = db $ pack [0xcb, 0x1 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
-  set b r = db $ pack [0xcb, 0x3 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
-  res b r = db $ pack [0xcb, 0x2 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
+  bit b r = code [0xcb, 0x1 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
+  set b r = code [0xcb, 0x3 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
+  res b r = code [0xcb, 0x2 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
 
 instance Bitwise C where
-  bit b r = db $ pack [0xcb, 0x1 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
-  set b r = db $ pack [0xcb, 0x3 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
-  res b r = db $ pack [0xcb, 0x2 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
+  bit b r = code [0xcb, 0x1 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
+  set b r = code [0xcb, 0x3 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
+  res b r = code [0xcb, 0x2 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
 
 instance Bitwise [HL] where
-  bit b [HL] = db $ pack [0xcb, 0x1 .<. 6 .|. b .<. 3 .|. 0x6]
+  bit b [HL] = code [0xcb, 0x1 .<. 6 .|. b .<. 3 .|. 0x6]
   bit _ x    = derefError x
-  set b [HL] = db $ pack [0xcb, 0x3 .<. 6 .|. b .<. 3 .|. 0x6]
+  set b [HL] = code [0xcb, 0x3 .<. 6 .|. b .<. 3 .|. 0x6]
   set _ x    = derefError x
-  res b [HL] = db $ pack [0xcb, 0x2 .<. 6 .|. b .<. 3 .|. 0x6]
+  res b [HL] = code [0xcb, 0x2 .<. 6 .|. b .<. 3 .|. 0x6]
   res _ x    = derefError x
 
 instance Bitwise [RegIx] where
-  bit b [i :+ d] = db $ pack [encodeOrError i, 0xcb, d, 0x1 .<. 6 .|. b .<. 3 .|. 0x6]
+  bit b [i :+ d] = code [encodeOrError i, 0xcb, d, 0x1 .<. 6 .|. b .<. 3 .|. 0x6]
   bit b [i]      = bit b [i+0]
   bit _ x        = derefError x
-  set b [i :+ d] = db $ pack [encodeOrError i, 0xcb, d, 0x3 .<. 6 .|. b .<. 3 .|. 0x6]
+  set b [i :+ d] = code [encodeOrError i, 0xcb, d, 0x3 .<. 6 .|. b .<. 3 .|. 0x6]
   set b [i]      = set b [i+0]
   set _ x        = derefError x
-  res b [i :+ d] = db $ pack [encodeOrError i, 0xcb, d, 0x2 .<. 6 .|. b .<. 3 .|. 0x6]
+  res b [i :+ d] = code [encodeOrError i, 0xcb, d, 0x2 .<. 6 .|. b .<. 3 .|. 0x6]
   res b [i]      = res b [i+0]
   res _ x        = derefError x
 
@@ -668,36 +669,36 @@ instance Bitwise [RegIx] where
 class Jump p r where
   jp :: p -> r
 
-instance (nn ~ Word16) => Jump nn Z80ASM where
-  jp nn = db $ pack [0xc3, lo nn, hi nn]
+instance (nn ~ Word16) => Jump nn (Z80 a) where
+  jp nn = db (pack [0xc3, lo nn, hi nn]) >> return (error "Return value from jp is meaningless")
 
-instance (Cond cc, nn ~ Word16) => Jump cc (nn -> Z80ASM) where
-  jp cc = \nn -> db $ pack [0x3 .<. 6 .|. encodeCondition cc .<. 3 .|. 0x2, lo nn, hi nn]
+instance (Cond cc, nn ~ Word16) => Jump cc (nn -> Z80 a) where
+  jp cc = \nn -> db (pack [0x3 .<. 6 .|. encodeCondition cc .<. 3 .|. 0x2, lo nn, hi nn]) >> return (error "Return value from jp is meaningless")
 
 instance Jump [HL] Z80ASM where
-  jp [HL] = db $ pack [0xe9]
+  jp [HL] = code [0xe9]
   jp x    = derefError x
 
 instance Jump [RegIx] Z80ASM where
-  jp [i] = db $ pack [encodeReg16 i, 0xe9]
+  jp [i] = code [encodeReg16 i, 0xe9]
   jp x   = derefError x
 
 class JumpRelative p r where
   jr :: p -> r
 
 instance (a ~ Word16) => JumpRelative a Z80ASM where
-  jr    = relative >=> \a -> db $ pack [0x18, a-2]
+  jr    = relative >=> \a -> code [0x18, a-2]
 instance (a ~ Word16) => JumpRelative C (a -> Z80ASM) where
-  jr C  = relative >=> \a -> db $ pack [0x38, a-2]
+  jr C  = relative >=> \a -> code [0x38, a-2]
 instance (a ~ Word16) => JumpRelative NC (a -> Z80ASM) where
-  jr NC = relative >=> \a -> db $ pack [0x30, a-2]
+  jr NC = relative >=> \a -> code [0x30, a-2]
 instance (a ~ Word16) => JumpRelative Z (a -> Z80ASM) where
-  jr Z  = relative >=> \a -> db $ pack [0x28, a-2]
+  jr Z  = relative >=> \a -> code [0x28, a-2]
 instance (a ~ Word16) => JumpRelative NZ (a -> Z80ASM) where
-  jr NZ = relative >=> \a -> db $ pack [0x20, a-2]
+  jr NZ = relative >=> \a -> code [0x20, a-2]
 
 djnz :: Word16 -> Z80ASM
-djnz = relative >=> \a -> db $ pack [0x10, a-2]
+djnz = relative >=> \a -> code [0x10, a-2]
 
 ($-), ($+) :: (Word16 -> Z80ASM) -> Word16 -> Z80ASM
 op $- a = op . subtract a =<< label
@@ -707,24 +708,24 @@ op $+ a = op . (+ a) =<< label
 
 class Call p r where
   call :: p -> r
-instance (nn ~ Word16) => Call nn Z80ASM where
-  call nn = db $ pack [0xcd, lo nn, hi nn]
-instance (a ~ Word16, Cond cc) => Call cc (a -> Z80ASM) where
-  call cc = \nn -> db $ pack [0x3 .<. 6 .|. encodeCondition cc .<. 3 .|. 0x4, lo nn, hi nn]
+instance (nn ~ Word16) => Call nn (Z80 a) where
+  call nn = db (pack [0xcd, lo nn, hi nn]) >> return (error "Return value from call is meaningless")
+instance (nn ~ Word16, Cond cc) => Call cc (nn -> Z80 a) where
+  call cc = \nn -> db (pack [0x3 .<. 6 .|. encodeCondition cc .<. 3 .|. 0x4, lo nn, hi nn]) >> return (error "Return value from call is meaningless")
 
 class Return t where
   ret :: t
-instance Return Z80ASM where
-  ret = db $ pack [0xc9]
-instance (Cond cc) => Return (cc -> Z80ASM) where
-  ret = \cc -> db $ pack [0x3 .<. 6 .|. encodeCondition cc .<. 3]
+instance Return (Z80 a) where
+  ret = db (pack [0xc9]) >> return (error "Return value from call is meaningless")
+instance (Cond cc) => Return (cc -> Z80 a) where
+  ret = \cc -> db (pack [0x3 .<. 6 .|. encodeCondition cc .<. 3]) >> return (error "Return value from call is meaningless")
 
 reti, retn :: Z80ASM
-reti = db $ pack [0xed, 0x4d]
-retn = db $ pack [0xed, 0x45]
+reti = code [0xed, 0x4d]
+retn = code [0xed, 0x45]
 
 rst :: Word8 -> Z80ASM
-rst p = db $ pack [0x3 .<. 6 .|. encodeMemLoc p .<. 3 .|. 0x7] where
+rst p = code [0x3 .<. 6 .|. encodeMemLoc p .<. 3 .|. 0x7] where
   encodeMemLoc 0x00 = 0x0 -- 000
   encodeMemLoc 0x08 = 0x1 -- 001
   encodeMemLoc 0x10 = 0x2 -- 010
@@ -742,38 +743,38 @@ class InOut target source where
   out :: source -> target -> Z80ASM
 
 instance (Word8 ~ n) => InOut A [n] where
-  in_ A [n] = db $ pack [0xdb, n]
+  in_ A [n] = code [0xdb, n]
   in_ _ x   = derefError x
-  out [n] A = db $ pack [0xd3, n]
+  out [n] A = code [0xd3, n]
   out x   _ = derefError x
 
 instance InOut Reg8 [C] where
-  in_ r [C] = db $ pack [0xeb, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
+  in_ r [C] = code [0xeb, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
   in_ _ x   = derefError x
-  out [C] r = db $ pack [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3 .|. 0x1]
+  out [C] r = code [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3 .|. 0x1]
   out x   _ = derefError x
 instance InOut A [C] where
-  in_ r [C] = db $ pack [0xeb, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
+  in_ r [C] = code [0xeb, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
   in_ _ x   = derefError x
-  out [C] r = db $ pack [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3 .|. 0x1]
+  out [C] r = code [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3 .|. 0x1]
   out x   _ = derefError x
 instance InOut C [C] where
-  in_ r [C] = db $ pack [0xeb, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
+  in_ r [C] = code [0xeb, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
   in_ _ x   = derefError x
-  out [C] r = db $ pack [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3 .|. 0x1]
+  out [C] r = code [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3 .|. 0x1]
   out x   _ = derefError x
 
 ini, inir, ind, indr :: Z80ASM
-ini  = db $ pack [0xed, 0xa2]
-inir = db $ pack [0xed, 0xb2]
-ind  = db $ pack [0xed, 0xaa]
-indr = db $ pack [0xed, 0xba]
+ini  = code [0xed, 0xa2]
+inir = code [0xed, 0xb2]
+ind  = code [0xed, 0xaa]
+indr = code [0xed, 0xba]
 
 outi, otir, outd, otdr :: Z80ASM
-outi = db $ pack [0xed, 0xa3]
-otir = db $ pack [0xed, 0xb3]
-outd = db $ pack [0xed, 0xab]
-otdr = db $ pack [0xed, 0xbb]
+outi = code [0xed, 0xa3]
+otir = code [0xed, 0xb3]
+outd = code [0xed, 0xab]
+otdr = code [0xed, 0xbb]
 
 {- -------- INTERNAL UTILITIES -------- -}
 
