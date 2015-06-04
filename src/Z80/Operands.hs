@@ -19,6 +19,10 @@ module Z80.Operands
   , C (..)
     -- * Addresses
   , Location
+    -- * Lower-case versions of registers and conditions
+  , a, b, c, d, e, f, h, l, i, r
+  , bc, de, hl, af, af', sp, pc, ix, iy
+  , z, nz, nc, po, pe, p, m
   ) where
 
 import Data.Word
@@ -92,3 +96,30 @@ data Condition
   | M
 
 type Location = Word16
+
+a   = A
+b   = B
+c   = C
+d   = D
+e   = E
+f   = F
+h   = H
+l   = L
+i   = I
+r   = R
+bc  = BC
+de  = DE
+hl  = HL
+af  = AF
+af' = AF'
+sp  = SP
+pc  = PC
+ix  = IX
+iy  = IY
+z   = Z
+nz  = NZ
+nc  = NC
+po  = PO
+pe  = PE
+p   = P
+m   = M
