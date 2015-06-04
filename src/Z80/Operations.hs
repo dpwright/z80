@@ -94,8 +94,9 @@ import Data.ByteString
 import Z80.Assembler
 import Z80.Operands
 
-import Prelude hiding (and, or)
-import Control.Monad ((>=>))
+import Control.Applicative ((<$>))
+import Control.Monad       ((>=>))
+import Prelude hiding      (and, or)
 
 class Load tgt src where
   ld :: tgt -> src -> Z80ASM
