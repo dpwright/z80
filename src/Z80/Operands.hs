@@ -1,4 +1,6 @@
 {-# LANGUAGE TypeOperators #-}
+{-# OPTIONS_GHC -fno-warn-missing-signatures #-}
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Z80.Operands
   ( -- * Generic Registers

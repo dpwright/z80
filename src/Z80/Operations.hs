@@ -3,6 +3,7 @@
 {-# LANGUAGE IncoherentInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Z80.Operations
   ( -- * Load Group
