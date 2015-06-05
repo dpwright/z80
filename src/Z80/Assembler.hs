@@ -11,6 +11,7 @@ module Z80.Assembler
   , label
   , labelled
   , withLabel
+  , end
   ) where
 
 import Data.Word
@@ -57,6 +58,9 @@ withLabel :: (Location -> Z80 a )-> Z80 a
 withLabel asm = do
   l <- label
   asm l
+
+end :: Z80ASM
+end = return ()
 
 org :: Location -> Z80ASM -> ASMBlock
 org addr (Z80 mc) = ASMBlock { asmOrg = addr, asmData = asm }

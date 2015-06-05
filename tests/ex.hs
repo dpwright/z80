@@ -20,5 +20,4 @@ ex = BS.writeFile "test.bin" . asmData . org 0x6000 $ mdo
 
   string <- labelled $ db "Dani is cool"
   eostr  <- label
-
-  return ()
+  end
