@@ -8,7 +8,10 @@ module Z80.Assembler
   , code
   , db
   , equ
-  , label ) where
+  , label
+  , labelled
+  , withLabel
+  ) where
 
 import Data.Word
 import qualified Data.ByteString as BS
@@ -43,6 +46,17 @@ db bs = Z80 $ do
 
 label :: Z80 Location
 label = Z80 get
+
+labelled :: Z80 a -> Z80 Location
+labelled asm = do
+  l <- label
+  asm
+  return l
+
+withLabel :: (Location -> Z80 a )-> Z80 a
+withLabel asm = do
+  l <- label
+  asm l
 
 org :: Location -> Z80ASM -> ASMBlock
 org addr (Z80 mc) = ASMBlock { asmOrg = addr, asmData = asm }
