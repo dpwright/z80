@@ -1,4 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Z80.Assembler
   ( Z80
