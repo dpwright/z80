@@ -7,10 +7,13 @@
 
 module Z80.Operations
   ( -- * Load Group
-    ld
+    Load
+  , ld
+  , Stack
   , push
   , pop
     -- * Exchange, Block Transfer, and Search Group
+  , Exchange
   , ex
   , exx
   , ldi
@@ -22,14 +25,18 @@ module Z80.Operations
   , cpd
   , cpdr
     -- * 8-Bit Arithmetic Group
+  , Arithmetic8
   , sub
   , and
   , or
   , xor
   , cp
+  , Inc
   , inc
   , dec
     -- * General-Purpose Arithmetic and CPU Control Groups
+  , Arithmetic
+  , CarryArithmetic
   , daa
   , cpl
   , neg
@@ -45,6 +52,7 @@ module Z80.Operations
   , adc
   , sbc
     -- * Rotate and Shift Group
+  , RotateShift
   , rlca
   , rla
   , rrca
@@ -59,22 +67,28 @@ module Z80.Operations
   , rld
   , rrd
     -- * Bit Set, Reset, and Test Group
+  , Bitwise
   , bit
   , set
   , res
     -- * Jump Group
+  , Jump
   , jp
+  , JumpRelative
   , jr
   , djnz
   , ($-)
   , ($+)
     -- * Call and Return Group
+  , Call
   , call
+  , Return
   , ret
   , reti
   , retn
   , rst
     -- * Input and Output Group
+  , InOut
   , in_
   , ini
   , inir
