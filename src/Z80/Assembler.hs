@@ -52,8 +52,7 @@ label = Z80 get
 labelled :: Z80 a -> Z80 Location
 labelled asm = do
   l <- label
-  asm
-  return l
+  asm >> return l
 
 withLabel :: (Location -> Z80 a )-> Z80 a
 withLabel asm = do
