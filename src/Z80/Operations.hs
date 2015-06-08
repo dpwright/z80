@@ -671,10 +671,10 @@ class Jump p r where
   jp :: p -> r
 
 instance (nn ~ Word16) => Jump nn (Z80 a) where
-  jp nn = code [0xc3, lo nn, hi nn] >> return (error "Return value from jp is meaningless")
+  jp nn = meaningless "jp" $ code [0xc3, lo nn, hi nn]
 
 instance (Cond cc, nn ~ Word16) => Jump cc (nn -> Z80 a) where
-  jp cc = \nn -> code [0x3 .<. 6 .|. encodeCondition cc .<. 3 .|. 0x2, lo nn, hi nn] >> return (error "Return value from jp is meaningless")
+  jp cc = \nn -> meaningless "jp" $ code [0x3 .<. 6 .|. encodeCondition cc .<. 3 .|. 0x2, lo nn, hi nn]
 
 instance Jump [HL] Z80ASM where
   jp [HL] = code [0xe9]
@@ -710,16 +710,16 @@ op $+ a = op . (+ a) =<< label
 class Call p r where
   call :: p -> r
 instance (nn ~ Word16) => Call nn (Z80 a) where
-  call nn = code [0xcd, lo nn, hi nn] >> return (error "Return value from call is meaningless")
+  call nn = meaningless "call" $ code [0xcd, lo nn, hi nn]
 instance (nn ~ Word16, Cond cc) => Call cc (nn -> Z80 a) where
-  call cc = \nn -> code [0x3 .<. 6 .|. encodeCondition cc .<. 3 .|. 0x4, lo nn, hi nn] >> return (error "Return value from call is meaningless")
+  call cc = \nn -> meaningless "call" $ code [0x3 .<. 6 .|. encodeCondition cc .<. 3 .|. 0x4, lo nn, hi nn]
 
 class Return t where
   ret :: t
 instance Return (Z80 a) where
-  ret = code [0xc9] >> return (error "Return value from call is meaningless")
+  ret = meaningless "call" $ code [0xc9]
 instance (Cond cc) => Return (cc -> Z80 a) where
-  ret = \cc -> code [0x3 .<. 6 .|. encodeCondition cc .<. 3] >> return (error "Return value from call is meaningless")
+  ret = \cc -> meaningless "call" $ code [0x3 .<. 6 .|. encodeCondition cc .<. 3]
 
 reti, retn :: Z80ASM
 reti = code [0xed, 0x4d]
@@ -795,6 +795,9 @@ relative a = fromIntegral . validate . (`subtract` (fromIntegral a)) . asInt <$>
 
 derefError :: Show a => a -> b
 derefError x = error $ "Dereference syntax is a list with exactly one entry. Invalid: " ++ show x
+
+meaningless :: Monad m => String -> m a -> m b
+meaningless s a = a >> return (error $ "Return value from " ++ s ++ " is meaningless")
 
 class EncodeReg8 r where
   encodeReg8 :: r -> Word8
