@@ -115,11 +115,11 @@ instance Load A C where
 instance Load C A where
   ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
 
-instance (n ~ Word16) => Load Reg8 n where
+instance (n ~ Word8) => Load Reg8 n where
   ld r n = code [encodeReg8 r .<. 3 .|. 6, fromIntegral n]
-instance (n ~ Word16) => Load A n where
+instance (n ~ Word8) => Load A n where
   ld r n = code [encodeReg8 r .<. 3 .|. 6, fromIntegral n]
-instance (n ~ Word16) => Load C n where
+instance (n ~ Word8) => Load C n where
   ld r n = code [encodeReg8 r .<. 3 .|. 6, fromIntegral n]
 
 instance Load Reg8 [HL] where
