@@ -89,7 +89,6 @@ module Z80.Operations
 
 import Data.Bits hiding (xor, bit)
 import Data.Word
-import Data.ByteString
 
 import Z80.Assembler
 import Z80.Operands
@@ -146,38 +145,38 @@ instance (n ~ Word8) => Load [HL] n where
   ld x _ = derefError x
 
 instance Load Reg8 [RegIx] where
-  ld r [i :+ ofst] = db $
-    pack [encodeOrError i, 1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6, ofst]
+  ld r [i :+ ofst] =
+    code [encodeOrError i, 1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6, ofst]
   ld r [i] = ld r [i+0]
   ld _ x   = derefError x
 instance Load A [RegIx] where
-  ld r [i :+ ofst] = db $
-    pack [encodeOrError i, 1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6, ofst]
+  ld r [i :+ ofst] =
+    code [encodeOrError i, 1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6, ofst]
   ld r [i] = ld r [i+0]
   ld _ x   = derefError x
 instance Load C [RegIx] where
-  ld r [i :+ ofst] = db $
-    pack [encodeOrError i, 1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6, ofst]
+  ld r [i :+ ofst] =
+    code [encodeOrError i, 1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6, ofst]
   ld r [i] = ld r [i+0]
   ld _ x   = derefError x
 instance Load [RegIx] Reg8 where
-  ld [i :+ ofst] r = db $
-    pack [encodeOrError i, 1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r, ofst]
+  ld [i :+ ofst] r =
+    code [encodeOrError i, 1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r, ofst]
   ld [i] r = ld [i+0] r
   ld x   _ = derefError x
 instance Load [RegIx] A where
-  ld [i :+ ofst] r = db $
-    pack [encodeOrError i, 1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r, ofst]
+  ld [i :+ ofst] r =
+    code [encodeOrError i, 1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r, ofst]
   ld [i] r = ld [i+0] r
   ld x   _ = derefError x
 instance Load [RegIx] C where
-  ld [i :+ ofst] r = db $
-    pack [encodeOrError i, 1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r, ofst]
+  ld [i :+ ofst] r =
+    code [encodeOrError i, 1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r, ofst]
   ld [i] r = ld [i+0] r
   ld x   _ = derefError x
 instance (n ~ Word8) => Load [RegIx] n where
-  ld [i :+ ofst] n = db $
-    pack [encodeOrError i, 0x36, ofst, n]
+  ld [i :+ ofst] n =
+    code [encodeOrError i, 0x36, ofst, n]
   ld [i] n = ld [i+0] n
   ld x   _ = derefError x
 
@@ -672,10 +671,10 @@ class Jump p r where
   jp :: p -> r
 
 instance (nn ~ Word16) => Jump nn (Z80 a) where
-  jp nn = db (pack [0xc3, lo nn, hi nn]) >> return (error "Return value from jp is meaningless")
+  jp nn = code [0xc3, lo nn, hi nn] >> return (error "Return value from jp is meaningless")
 
 instance (Cond cc, nn ~ Word16) => Jump cc (nn -> Z80 a) where
-  jp cc = \nn -> db (pack [0x3 .<. 6 .|. encodeCondition cc .<. 3 .|. 0x2, lo nn, hi nn]) >> return (error "Return value from jp is meaningless")
+  jp cc = \nn -> code [0x3 .<. 6 .|. encodeCondition cc .<. 3 .|. 0x2, lo nn, hi nn] >> return (error "Return value from jp is meaningless")
 
 instance Jump [HL] Z80ASM where
   jp [HL] = code [0xe9]
@@ -711,16 +710,16 @@ op $+ a = op . (+ a) =<< label
 class Call p r where
   call :: p -> r
 instance (nn ~ Word16) => Call nn (Z80 a) where
-  call nn = db (pack [0xcd, lo nn, hi nn]) >> return (error "Return value from call is meaningless")
+  call nn = code [0xcd, lo nn, hi nn] >> return (error "Return value from call is meaningless")
 instance (nn ~ Word16, Cond cc) => Call cc (nn -> Z80 a) where
-  call cc = \nn -> db (pack [0x3 .<. 6 .|. encodeCondition cc .<. 3 .|. 0x4, lo nn, hi nn]) >> return (error "Return value from call is meaningless")
+  call cc = \nn -> code [0x3 .<. 6 .|. encodeCondition cc .<. 3 .|. 0x4, lo nn, hi nn] >> return (error "Return value from call is meaningless")
 
 class Return t where
   ret :: t
 instance Return (Z80 a) where
-  ret = db (pack [0xc9]) >> return (error "Return value from call is meaningless")
+  ret = code [0xc9] >> return (error "Return value from call is meaningless")
 instance (Cond cc) => Return (cc -> Z80 a) where
-  ret = \cc -> db (pack [0x3 .<. 6 .|. encodeCondition cc .<. 3]) >> return (error "Return value from call is meaningless")
+  ret = \cc -> code [0x3 .<. 6 .|. encodeCondition cc .<. 3] >> return (error "Return value from call is meaningless")
 
 reti, retn :: Z80ASM
 reti = code [0xed, 0x4d]
