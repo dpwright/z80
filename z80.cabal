@@ -2,6 +2,7 @@ name:                z80
 version:             0.1.0.0
 synopsis:            A Z80 assembler embedded in Haskell
 description:         A Z80 assembler embedded in Haskell
+homepage:            https://github.com/dpwright/z80
 license:             MIT
 license-file:        LICENSE
 author:              Daniel P. Wright
