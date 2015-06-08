@@ -687,16 +687,16 @@ instance Jump [RegIx] Z80ASM where
 class JumpRelative p r where
   jr :: p -> r
 
-instance (a ~ Word16) => JumpRelative a Z80ASM where
-  jr    = relative >=> \a -> code [0x18, a-2]
-instance (a ~ Word16) => JumpRelative C (a -> Z80ASM) where
-  jr C  = relative >=> \a -> code [0x38, a-2]
-instance (a ~ Word16) => JumpRelative NC (a -> Z80ASM) where
-  jr NC = relative >=> \a -> code [0x30, a-2]
-instance (a ~ Word16) => JumpRelative Z (a -> Z80ASM) where
-  jr Z  = relative >=> \a -> code [0x28, a-2]
-instance (a ~ Word16) => JumpRelative NZ (a -> Z80ASM) where
-  jr NZ = relative >=> \a -> code [0x20, a-2]
+instance (a ~ Word16) => JumpRelative a (Z80 b) where
+  jr    = relative >=> \a -> meaningless "jr" $ code [0x18, a-2]
+instance (a ~ Word16) => JumpRelative C (a -> Z80 b) where
+  jr C  = relative >=> \a -> meaningless "jr" $ code [0x38, a-2]
+instance (a ~ Word16) => JumpRelative NC (a -> Z80 b) where
+  jr NC = relative >=> \a -> meaningless "jr" $ code [0x30, a-2]
+instance (a ~ Word16) => JumpRelative Z (a -> Z80 b) where
+  jr Z  = relative >=> \a -> meaningless "jr" $ code [0x28, a-2]
+instance (a ~ Word16) => JumpRelative NZ (a -> Z80 b) where
+  jr NZ = relative >=> \a -> meaningless "jr" $ code [0x20, a-2]
 
 djnz :: Word16 -> Z80ASM
 djnz = relative >=> \a -> code [0x10, a-2]
