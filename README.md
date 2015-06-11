@@ -10,4 +10,4 @@ Licence
 
 Released under the MIT licence; see LICENSE for details.
 
-Copywright (c) Daniel P. Wright 2015.
+Copyright (c) Daniel P. Wright 2015.
