@@ -764,17 +764,17 @@ instance (Word8 ~ n) => InOut A [n] where
   out x   _ = derefError x
 
 instance InOut Reg8 [C] where
-  in_ r [C] = code [0xeb, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
+  in_ r [C] = code [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
   in_ _ x   = derefError x
   out [C] r = code [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3 .|. 0x1]
   out x   _ = derefError x
 instance InOut A [C] where
-  in_ r [C] = code [0xeb, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
+  in_ r [C] = code [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
   in_ _ x   = derefError x
   out [C] r = code [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3 .|. 0x1]
   out x   _ = derefError x
 instance InOut C [C] where
-  in_ r [C] = code [0xeb, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
+  in_ r [C] = code [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
   in_ _ x   = derefError x
   out [C] r = code [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3 .|. 0x1]
   out x   _ = derefError x

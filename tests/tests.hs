@@ -189,7 +189,7 @@ main = defaultMain $ testGroup "Tests" [
   ],
   testGroup "Input and Output Group"
   [ testCase "IN A, (n)"    $ in_ A [0x01]         $?= [0xdb, 0x01]
-  , testCase "IN r, (C)"    $ in_ D [C]            $?= [0xeb, 0x50]
+  , testCase "IN r, (C)"    $ in_ D [C]            $?= [0xed, 0x50]
   , testCase "INI"          $ ini                  $?= [0xed, 0xa2]
   , testCase "INIR"         $ inir                 $?= [0xed, 0xb2]
   , testCase "IND"          $ ind                  $?= [0xed, 0xaa]
