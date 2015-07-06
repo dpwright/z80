@@ -8,6 +8,7 @@ module Z80.Assembler
   , org
   , code
   , db
+  , defb
   , equ
   , label
   , labelled
@@ -45,6 +46,9 @@ db :: ByteString -> Z80ASM
 db bs = Z80 $ do
   tell bs
   modify (+ fromIntegral (BS.length bs))
+
+defb :: ByteString -> Z80ASM
+defb = db
 
 label :: Z80 Location
 label = Z80 get
