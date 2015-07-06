@@ -16,7 +16,8 @@ library
   exposed-modules:     Z80,
                        Z80.Assembler,
                        Z80.Operations,
-                       Z80.Operands
+                       Z80.Operands,
+                       Z80.Macros
   build-depends:       base >=4.7 && <4.9,
                        bytestring,
                        mtl
