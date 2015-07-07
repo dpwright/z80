@@ -59,7 +59,7 @@ labelled asm = do
   l <- label
   asm >> return l
 
-withLabel :: (Location -> Z80 a )-> Z80 a
+withLabel :: (Location -> Z80 a) -> Z80 a
 withLabel asm = do
   l <- label
   asm l
