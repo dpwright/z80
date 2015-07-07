@@ -27,7 +27,12 @@ import Prelude
 
 import Z80.Operands
 
-newtype Z80 a = Z80 (RWS () ByteString Location a)
+data ASMState
+  = ASMState
+  { loc :: Location
+  }
+
+newtype Z80 a = Z80 (RWS () ByteString ASMState a)
   deriving (Functor, Applicative, Monad, MonadFix)
 type Z80ASM = Z80 ()
 
@@ -38,21 +43,24 @@ data ASMBlock
   , asmData  :: ByteString
   } deriving (Eq, Show)
 
+incrementLoc :: Location -> ASMState -> ASMState
+incrementLoc x st = st { loc = loc st + x }
+
 code :: [Word8] -> Z80ASM
 code bytes = Z80 $ do
   tell $ BS.pack bytes
-  modify (+ fromIntegral (length bytes))
+  modify (incrementLoc . fromIntegral $ length bytes)
 
 db :: ByteString -> Z80ASM
 db bs = Z80 $ do
   tell bs
-  modify (+ fromIntegral (BS.length bs))
+  modify (incrementLoc . fromIntegral $ BS.length bs)
 
 defb :: ByteString -> Z80ASM
 defb = db
 
 label :: Z80 Location
-label = Z80 get
+label = loc <$> Z80 get
 
 labelled :: Z80 a -> Z80 Location
 labelled asm = do
@@ -69,7 +77,7 @@ end = return ()
 
 org :: Location -> Z80ASM -> ASMBlock
 org addr (Z80 mc) = ASMBlock { asmOrg = addr, asmEntry = addr, asmData = asm }
- where ((), _, asm) = runRWS mc () addr
+ where ((), _, asm) = runRWS mc () (ASMState addr)
 
 equ :: a -> Z80 a
 equ = return
