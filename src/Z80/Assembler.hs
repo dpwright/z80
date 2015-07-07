@@ -33,8 +33,9 @@ type Z80ASM = Z80 ()
 
 data ASMBlock
   = ASMBlock
-  { asmOrg  :: Location
-  , asmData :: ByteString
+  { asmOrg   :: Location
+  , asmEntry :: Location
+  , asmData  :: ByteString
   } deriving (Eq, Show)
 
 code :: [Word8] -> Z80ASM
@@ -67,7 +68,7 @@ end :: Z80ASM
 end = return ()
 
 org :: Location -> Z80ASM -> ASMBlock
-org addr (Z80 mc) = ASMBlock { asmOrg = addr, asmData = asm }
+org addr (Z80 mc) = ASMBlock { asmOrg = addr, asmEntry = addr, asmData = asm }
  where ((), _, asm) = runRWS mc () addr
 
 equ :: a -> Z80 a
