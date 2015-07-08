@@ -7,8 +7,8 @@ module Z80.Assembler
   , ASMBlock (..)
   , org
   , code
-  , db
   , defb
+  , db
   , equ
   , label
   , labelled
@@ -51,13 +51,13 @@ code bytes = Z80 $ do
   tell $ BS.pack bytes
   modify (incrementLoc . fromIntegral $ length bytes)
 
-db :: ByteString -> Z80ASM
-db bs = Z80 $ do
+defb :: ByteString -> Z80ASM
+defb bs = Z80 $ do
   tell bs
   modify (incrementLoc . fromIntegral $ BS.length bs)
 
-defb :: ByteString -> Z80ASM
-defb = db
+db :: ByteString -> Z80ASM
+db = defb
 
 label :: Z80 Location
 label = loc <$> Z80 get
