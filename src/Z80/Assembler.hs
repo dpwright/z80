@@ -32,7 +32,7 @@ data ASMState
   { loc :: Location
   }
 
-newtype Z80 a = Z80 (RWS () ByteString ASMState a)
+newtype Z80 a = Z80 { runZ80 :: RWS () ByteString ASMState a }
   deriving (Functor, Applicative, Monad, MonadFix)
 type Z80ASM = Z80 ()
 
