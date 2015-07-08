@@ -1,4 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Z80.Assembler
@@ -7,7 +8,7 @@ module Z80.Assembler
   , ASMBlock (..)
   , org
   , code
-  , defb
+  , Bytes (..)
   , db
   , equ
   , label
@@ -32,7 +33,7 @@ data ASMState
   { loc :: Location
   }
 
-newtype Z80 a = Z80 { runZ80 :: RWS () ByteString ASMState a }
+newtype Z80 a = Z80 (RWS () ByteString ASMState a)
   deriving (Functor, Applicative, Monad, MonadFix)
 type Z80ASM = Z80 ()
 
@@ -51,13 +52,21 @@ code bytes = Z80 $ do
   tell $ BS.pack bytes
   modify (incrementLoc . fromIntegral $ length bytes)
 
-defb :: ByteString -> Z80ASM
-defb bs = Z80 $ do
+class Bytes a where
+  defb :: a -> Z80ASM
+
+instance Bytes ByteString where
+  defb = defByteString
+instance (b ~ Word8) => Bytes [b] where
+  defb = defByteString . BS.pack
+
+db :: Bytes a => a -> Z80ASM
+db = defb
+
+defByteString :: ByteString -> Z80ASM
+defByteString bs = Z80 $ do
   tell bs
   modify (incrementLoc . fromIntegral $ BS.length bs)
-
-db :: ByteString -> Z80ASM
-db = defb
 
 label :: Z80 Location
 label = loc <$> Z80 get
