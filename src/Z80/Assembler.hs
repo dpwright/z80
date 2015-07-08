@@ -24,6 +24,7 @@ import Data.ByteString (ByteString)
 import Control.Monad.RWS
 
 import Control.Applicative
+import Data.Traversable (traverse)
 import Prelude
 
 import Z80.Operands
