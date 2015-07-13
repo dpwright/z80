@@ -3,6 +3,7 @@
 module Z80.Macros
   ( ldVia
   , decLoopB
+  , loopForever
   ) where
 
 import Z80.Assembler
@@ -31,3 +32,9 @@ decLoopB :: Word8  -- ^ Number of iterations to run
 decLoopB count asm = do
   ld B count
   withLabel $ \loop -> asm >> djnz loop
+
+-- | loopForever defines a label, and then adds a jump to that label at the end of the
+-- supplied assembly block, looping forever unless you break out of it with a jump or
+-- call instruction.
+loopForever :: Z80ASM -> Z80ASM
+loopForever asm = withLabel $ \loop -> asm >> jp loop
