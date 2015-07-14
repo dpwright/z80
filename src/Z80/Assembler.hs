@@ -92,10 +92,12 @@ withLabel asm = do
 static :: String -> Z80ASM -> Z80 Location
 static name asm = do
   Z80 $ modify addIfMissing
-  loc <- M.lookup name . staticLocs <$> Z80 get
+  st <- Z80 get
+  let loc           = M.lookup name $ staticLocs st
+      notFoundError = error $ "Static \"" ++ name ++ "\" not found.  This is probably a bug in the z80 package, please report.\n" ++
+                              "Statics: " ++ show (staticLocs st)
   return $ fromMaybe notFoundError loc
-  where notFoundError   = error $ "Static \"" ++ name ++ "\" not found.  This is probably a bug in the z80 package, please report."
-        addIfMissing st = if M.member name $ statics st then st
+  where addIfMissing st = if M.member name $ statics st then st
                           else st { statics = M.insert name asm $ statics st }
 
 end :: Z80ASM
