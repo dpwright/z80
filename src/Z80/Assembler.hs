@@ -15,6 +15,7 @@ module Z80.Assembler
   , labelled
   , withLabel
   , end
+  , beginExecution
   ) where
 
 import Data.Word
@@ -22,6 +23,7 @@ import qualified Data.ByteString as BS
 import Data.ByteString (ByteString)
 
 import Control.Monad.RWS
+import Data.Maybe
 
 import Control.Applicative
 import Data.Traversable (traverse)
@@ -31,7 +33,8 @@ import Z80.Operands
 
 data ASMState
   = ASMState
-  { loc :: Location
+  { loc   :: Location
+  , entry :: Maybe Location
   }
 
 newtype Z80 a = Z80 (RWS () ByteString ASMState a)
@@ -85,9 +88,20 @@ withLabel asm = do
 end :: Z80ASM
 end = return ()
 
+beginExecution :: Z80ASM
+beginExecution = do
+  l <- label
+  Z80 . modify $ setEntry l
+  where setEntry l st@(ASMState _ Nothing)  = st { entry = Just l }
+        setEntry l st@(ASMState _ (Just e)) =
+          error $ "Cannot set execution start point twice.  First start point: " ++ show e ++
+                  " This start point: " ++ show l
+
 org :: Location -> Z80ASM -> ASMBlock
-org addr (Z80 mc) = ASMBlock { asmOrg = addr, asmEntry = addr, asmData = asm }
- where ((), _, asm) = runRWS mc () (ASMState addr)
+org addr (Z80 mc) = ASMBlock { asmOrg = addr,
+                               asmEntry = fromMaybe addr $ entry finalState,
+                               asmData = asm }
+ where ((), finalState, asm) = runRWS mc () (ASMState addr Nothing)
 
 equ :: a -> Z80 a
 equ = return
