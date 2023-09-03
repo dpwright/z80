@@ -67,7 +67,12 @@ class Bytes a where
 instance Bytes ByteString where
   defb = defByteString
 instance (b ~ Word8) => Bytes [b] where
-  defb = defByteString . BS.pack
+  defb bs = Z80 $ do
+      tell $ BS.pack bs
+      modify (incrementLoc . fromIntegral $ length bs)
+        -- The new location has to be computed lazily in the actual
+        -- content of the bytes, so that we can emit byte values
+        -- referring to later labels.
 
 db :: Bytes a => a -> Z80ASM
 db = defb
