@@ -1,5 +1,8 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE CPP #-}
+
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Z80.Assembler
@@ -22,11 +25,14 @@ import Data.Word
 import qualified Data.ByteString as BS
 import Data.ByteString (ByteString)
 
+import Control.Monad.Fix (MonadFix(..))
 import Control.Monad.RWS
 import Data.Maybe
 
+#if !MIN_VERSION_base(4,8,0)
 import Control.Applicative
 import Data.Traversable (traverse)
+#endif
 import Prelude
 
 import Z80.Operands
