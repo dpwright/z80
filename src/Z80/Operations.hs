@@ -849,6 +849,7 @@ instance EncodeReg16 AF where
 class EncodeReg16 r => Reg16 r
 instance Reg16 BC
 instance Reg16 DE
+instance Reg16 HL
 
 instance EncodeReg16 RegIx where
   encodeReg16 IX = 0xdd
