@@ -10,6 +10,7 @@ module Z80.Assembler
   , code
   , Bytes (..)
   , db
+  , resb
   , equ
   , label
   , labelled
@@ -34,6 +35,7 @@ import Z80.Operands
 data ASMState
   = ASMState
   { loc   :: Location
+  , lastLoc :: Location
   , entry :: Maybe Location
   }
 
@@ -48,13 +50,30 @@ data ASMBlock
   , asmData  :: ByteString
   } deriving (Eq, Show)
 
-incrementLoc :: Location -> ASMState -> ASMState
-incrementLoc x st = st { loc = loc st + x }
+fillToLoc :: Z80ASM
+fillToLoc = Z80 $ do
+    padding <- gets $ \st -> loc st - lastLoc st
+    tell $ BS.replicate (fromIntegral padding) 0x00
+
+incrementLoc :: Location -> Z80ASM
+incrementLoc x = do
+    fillToLoc
+    Z80 $ modify $ \st -> let loc' = loc st + x in st{ loc = loc', lastLoc = loc' }
+
+reserveLoc :: Location -> ASMState -> ASMState
+reserveLoc x st = st{ loc = loc st + x }
+
+tellBytes :: [Word8] -> Z80ASM
+tellBytes bytes = do
+    loc <- incrementLoc . fromIntegral $ length bytes
+    Z80 $ tell $ BS.pack bytes
+    pure loc
+      -- The new location has to be computed lazily in the actual
+      -- content of the bytes, so that we can emit byte values
+      -- referring to later labels.
 
 code :: [Word8] -> Z80ASM
-code bytes = Z80 $ do
-  tell $ BS.pack bytes
-  modify (incrementLoc . fromIntegral $ length bytes)
+code = tellBytes
 
 class Bytes a where
   defb :: a -> Z80ASM
@@ -62,15 +81,20 @@ class Bytes a where
 instance Bytes ByteString where
   defb = defByteString
 instance (b ~ Word8) => Bytes [b] where
-  defb = defByteString . BS.pack
+  defb = tellBytes
 
 db :: Bytes a => a -> Z80ASM
 db = defb
 
+resb :: Word16 -> Z80ASM
+resb n = Z80 $ do
+    modify $ reserveLoc n
+
 defByteString :: ByteString -> Z80ASM
-defByteString bs = Z80 $ do
-  tell bs
-  modify (incrementLoc . fromIntegral $ BS.length bs)
+defByteString bs = do
+  loc <- incrementLoc . fromIntegral $ BS.length bs
+  Z80 $ tell bs
+  pure loc
 
 label :: Z80 Location
 label = loc <$> Z80 get
@@ -92,16 +116,18 @@ beginExecution :: Z80ASM
 beginExecution = do
   l <- label
   Z80 . modify $ setEntry l
-  where setEntry l st@(ASMState _ Nothing)  = st { entry = Just l }
-        setEntry l st@(ASMState _ (Just e)) =
-          error $ "Cannot set execution start point twice.  First start point: " ++ show e ++
-                  " This start point: " ++ show l
+  where setEntry l st = case entry st of
+            Nothing -> st{ entry = Just l }
+            Just e ->
+              error $ "Cannot set execution start point twice.  First start point: " ++ show e ++
+                        " This start point: " ++ show l
 
 org :: Location -> Z80ASM -> ASMBlock
 org addr (Z80 mc) = ASMBlock { asmOrg = addr,
                                asmEntry = fromMaybe addr $ entry finalState,
-                               asmData = asm }
- where ((), finalState, asm) = runRWS mc () (ASMState addr Nothing)
+                               asmData = truncate asm }
+ where ((), finalState, asm) = runRWS mc () (ASMState addr addr Nothing)
+       truncate = BS.take (fromIntegral $ lastLoc finalState - addr)
 
 equ :: a -> Z80 a
 equ = return
