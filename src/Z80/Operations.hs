@@ -527,8 +527,13 @@ instance CarryArithmetic A [RegIx] where
 
 instance (Reg16 ss) => Arithmetic HL ss where
   add HL ss = code [encodeReg16 ss .<. 4 .|. 0x09]
+instance Arithmetic HL HL where
+  add HL ss = code [encodeReg16 ss .<. 4 .|. 0x09]
 
 instance (Reg16 ss) => CarryArithmetic HL ss where
+  adc HL ss = code [0xed, 0x40 .|. encodeReg16 ss .<. 4 .|. 0x0a]
+  sbc HL ss = code [0xed, 0x40 .|. encodeReg16 ss .<. 4 .|. 0x2]
+instance CarryArithmetic HL HL where
   adc HL ss = code [0xed, 0x40 .|. encodeReg16 ss .<. 4 .|. 0x0a]
   sbc HL ss = code [0xed, 0x40 .|. encodeReg16 ss .<. 4 .|. 0x2]
 
