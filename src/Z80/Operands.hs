@@ -5,13 +5,14 @@ module Z80.Operands
     Reg8 (..)
     -- * Special Registers
   , A (..), F (..), I (..), R (..)
+  , RegHL8 (..)
     -- * 16-Bit Registers
   , BC (..), DE (..), HL (..)
   , AF (..), SP (..), PC (..)
     -- * Shadow Registers
   , AF' (..)
     -- * Index Registers & Offsets
-  , RegIx (..)
+  , RegIx (..), RegIx8(..)
     -- * Conditions
   , Condition (..)
   , Z (..), NZ (..), NC (..)
@@ -23,7 +24,11 @@ module Z80.Operands
 
 import Data.Word
 
-data Reg8  = B | D | E | H | L deriving (Eq, Show)
+data Reg8  = B | D | E deriving (Eq, Show)
+
+-- H and L can be replaced with IXH/IXL or IYH/IYL in certain
+-- (undocumented) instructions
+data RegHL8 = H | L deriving (Eq, Show)
 
 -- Separating A from the other 8-bit registers allows me to define
 -- certain operations that *only* work with the accumulator, but at
@@ -48,6 +53,7 @@ data AF' = AF' deriving (Eq, Show)
 
 infixl 4 :+
 data RegIx = IX | IY | Maybe RegIx :+ Word8 deriving (Eq, Show)
+data RegIx8 = IXH | IXL | IYH | IYL deriving (Eq, Show)
 
 -- Extremely dodgy Num instance for ease-of-use.
 -- For now just applying all operations to the offset component, but there'd

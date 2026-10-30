@@ -8,7 +8,9 @@
 -- whether or not to make use of them.
 
 module Z80.Operands.LowerCase
-  ( a, b, c, d, e, f, h, l, i, r
+  ( a, b, c, d, e, f, h, l
+  , ixh, ixl, iyh, iyl
+  , i, r
   , bc, de, hl, af, af', sp, pc, ix, iy
   , z, nz, nc, po, pe, p, m
   ) where
@@ -22,6 +24,10 @@ d   = D
 e   = E
 f   = F
 h   = H
+ixh = IXH
+ixl = IXL
+iyh = IYH
+iyl = IYL
 l   = L
 i   = I
 r   = R

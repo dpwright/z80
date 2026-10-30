@@ -3,6 +3,7 @@
 {-# LANGUAGE IncoherentInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE BlockArguments #-}
 {-# OPTIONS_GHC -fno-warn-name-shadowing #-}
 
 module Z80.Operations
@@ -116,27 +117,63 @@ class Load tgt src where
 
 instance Load Reg8 Reg8 where
   ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
+instance Load Reg8 RegHL8 where
+  ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
+instance Load RegHL8 Reg8 where
+  ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
+instance Load RegHL8 RegHL8 where
+  ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
+
 instance Load Reg8 C where
+  ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
+instance Load RegHL8 C where
   ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
 instance Load C Reg8 where
   ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
+instance Load C RegHL8 where
+  ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
 instance Load A Reg8 where
   ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
+instance Load A RegHL8 where
+  ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
 instance Load Reg8 A where
+  ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
+instance Load RegHL8 A where
   ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
 instance Load A C where
   ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
 instance Load C A where
   ld r r' = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. encodeReg8 r']
 
+instance Load RegIx8 Reg8 where
+  ld r r' = translateIx8 r \r -> ld r r'
+instance Load Reg8 RegIx8 where
+  ld r r' = translateIx8 r' \r' -> ld r r'
+instance Load RegIx8 C where
+  ld r r' = translateIx8 r \r -> ld r r'
+instance Load C RegIx8 where
+  ld r r' = translateIx8 r' \r' -> ld r r'
+instance Load RegIx8 A where
+  ld r r' = translateIx8 r \r -> ld r r'
+instance Load A RegIx8 where
+  ld r r' = translateIx8 r' \r' -> ld r r'
+
+
 instance (n ~ Word8) => Load Reg8 n where
   ld r n = code [encodeReg8 r .<. 3 .|. 6, fromIntegral n]
+instance (n ~ Word8) => Load RegHL8 n where
+  ld r n = code [encodeReg8 r .<. 3 .|. 6, fromIntegral n]
+instance (n ~ Word8) => Load RegIx8 n where
+  ld r n = translateIx8 r \r -> ld r n
 instance (n ~ Word8) => Load A n where
   ld r n = code [encodeReg8 r .<. 3 .|. 6, fromIntegral n]
 instance (n ~ Word8) => Load C n where
   ld r n = code [encodeReg8 r .<. 3 .|. 6, fromIntegral n]
 
 instance Load Reg8 [HL] where
+  ld r [HL] = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6]
+  ld _ x = derefError x
+instance Load RegHL8 [HL] where
   ld r [HL] = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6]
   ld _ x = derefError x
 instance Load A [HL] where
@@ -146,6 +183,9 @@ instance Load C [HL] where
   ld r [HL] = code [1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6]
   ld _ x = derefError x
 instance Load [HL] Reg8 where
+  ld [HL] r = code [1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r]
+  ld x _ = derefError x
+instance Load [HL] RegHL8 where
   ld [HL] r = code [1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r]
   ld x _ = derefError x
 instance Load [HL] A where
@@ -163,6 +203,11 @@ instance Load Reg8 [RegIx] where
     code [encodeOrError i, 1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6, ofst]
   ld r [i] = ld r [i+0]
   ld _ x   = derefError x
+instance Load RegHL8 [RegIx] where
+  ld r [i :+ ofst] =
+    code [encodeOrError i, 1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6, ofst]
+  ld r [i] = ld r [i+0]
+  ld _ x   = derefError x
 instance Load A [RegIx] where
   ld r [i :+ ofst] =
     code [encodeOrError i, 1 .<. 6 .|. encodeReg8 r .<. 3 .|. 6, ofst]
@@ -174,6 +219,11 @@ instance Load C [RegIx] where
   ld r [i] = ld r [i+0]
   ld _ x   = derefError x
 instance Load [RegIx] Reg8 where
+  ld [i :+ ofst] r =
+    code [encodeOrError i, 1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r, ofst]
+  ld [i] r = ld [i+0] r
+  ld x   _ = derefError x
+instance Load [RegIx] RegHL8 where
   ld [i :+ ofst] r =
     code [encodeOrError i, 1 .<. 6 .|. 6 .<. 3 .|. encodeReg8 r, ofst]
   ld [i] r = ld [i+0] r
@@ -364,6 +414,20 @@ instance Arithmetic8 Reg8 where
   xor   r = code [0x1 .<. 7 .|. 0x5 .<. 3 .|. encodeReg8 r]
   cp    r = code [0x1 .<. 7 .|. 0x7 .<. 3 .|. encodeReg8 r]
 
+instance Arithmetic8 RegHL8 where
+  sub   r = code [0x1 .<. 7 .|. 0x2 .<. 3 .|. encodeReg8 r]
+  and   r = code [0x1 .<. 7 .|. 0x4 .<. 3 .|. encodeReg8 r]
+  or    r = code [0x1 .<. 7 .|. 0x6 .<. 3 .|. encodeReg8 r]
+  xor   r = code [0x1 .<. 7 .|. 0x5 .<. 3 .|. encodeReg8 r]
+  cp    r = code [0x1 .<. 7 .|. 0x7 .<. 3 .|. encodeReg8 r]
+
+instance Arithmetic8 RegIx8 where
+  sub   = flip translateIx8 sub
+  and   = flip translateIx8 and
+  or    = flip translateIx8 or
+  xor   = flip translateIx8 xor
+  cp    = flip translateIx8 cp
+
 instance (n ~ Word8) => Arithmetic8 n where
   sub   n = code [0xd6, n]
   and   n = code [0xe6, n]
@@ -415,6 +479,14 @@ instance Inc C where
 instance Inc Reg8 where
   inc r = code [encodeReg8 r .<. 3 .|. 0x4]
   dec r = code [encodeReg8 r .<. 3 .|. 0x5]
+
+instance Inc RegHL8 where
+  inc r = code [encodeReg8 r .<. 3 .|. 0x4]
+  dec r = code [encodeReg8 r .<. 3 .|. 0x5]
+
+instance Inc RegIx8 where
+  inc = flip translateIx8 inc
+  dec = flip translateIx8 dec
 
 instance Inc [HL] where
   inc [HL] = code [0x34]
@@ -491,9 +563,23 @@ instance CarryArithmetic A C where
 instance Arithmetic A Reg8 where
   add A r = code [0x1 .<. 7 .|. encodeReg8 r]
 
+instance Arithmetic A RegHL8 where
+  add A r = code [0x1 .<. 7 .|. encodeReg8 r]
+
+instance Arithmetic A RegIx8 where
+  add A r = translateIx8 r \r -> add A r
+
 instance CarryArithmetic A Reg8 where
   adc A r = code [0x1 .<. 7 .|. 0x1 .<. 3 .|. encodeReg8 r]
   sbc A r = code [0x1 .<. 7 .|. 0x3 .<. 3 .|. encodeReg8 r]
+
+instance CarryArithmetic A RegHL8 where
+  adc A r = code [0x1 .<. 7 .|. 0x1 .<. 3 .|. encodeReg8 r]
+  sbc A r = code [0x1 .<. 7 .|. 0x3 .<. 3 .|. encodeReg8 r]
+
+instance CarryArithmetic A RegIx8 where
+  adc A r = translateIx8 r \r -> adc A r
+  sbc A r = translateIx8 r \r -> sbc A r
 
 instance (n ~ Word8) => Arithmetic A n where
   add A n = code [0xc6, n]
@@ -578,6 +664,14 @@ instance RotateShift Reg8 where
   sla r = code [0xcb, 0x4 .<. 3 .|. encodeReg8 r]
   sra r = code [0xcb, 0x5 .<. 3 .|. encodeReg8 r]
   srl r = code [0xcb, 0x7 .<. 3 .|. encodeReg8 r]
+instance RotateShift RegHL8 where
+  rlc r = code [0xcb, encodeReg8 r]
+  rl  r = code [0xcb, 0x2 .<. 3 .|. encodeReg8 r]
+  rrc r = code [0xcb, 0x1 .<. 3 .|. encodeReg8 r]
+  rr  r = code [0xcb, 0x3 .<. 3 .|. encodeReg8 r]
+  sla r = code [0xcb, 0x4 .<. 3 .|. encodeReg8 r]
+  sra r = code [0xcb, 0x5 .<. 3 .|. encodeReg8 r]
+  srl r = code [0xcb, 0x7 .<. 3 .|. encodeReg8 r]
 instance RotateShift A where
   rlc r = code [0xcb, encodeReg8 r]
   rl  r = code [0xcb, 0x2 .<. 3 .|. encodeReg8 r]
@@ -646,6 +740,11 @@ class Bitwise r where
   res :: Word8 -> r -> Z80ASM
 
 instance Bitwise Reg8 where
+  bit b r = code [0xcb, 0x1 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
+  set b r = code [0xcb, 0x3 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
+  res b r = code [0xcb, 0x2 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
+
+instance Bitwise RegHL8 where
   bit b r = code [0xcb, 0x1 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
   set b r = code [0xcb, 0x3 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
   res b r = code [0xcb, 0x2 .<. 6 .|. b .<. 3 .|. encodeReg8 r]
@@ -768,6 +867,11 @@ instance InOut Reg8 [C] where
   in_ _ x   = derefError x
   out [C] r = code [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3 .|. 0x1]
   out x   _ = derefError x
+instance InOut RegHL8 [C] where
+  in_ r [C] = code [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
+  in_ _ x   = derefError x
+  out [C] r = code [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3 .|. 0x1]
+  out x   _ = derefError x
 instance InOut A [C] where
   in_ r [C] = code [0xed, 0x1 .<. 6 .|. encodeReg8 r .<. 3]
   in_ _ x   = derefError x
@@ -813,6 +917,13 @@ derefError x = error $ "Dereference syntax is a list with exactly one entry. Inv
 meaningless :: Monad m => String -> m a -> m b
 meaningless s a = a >> return (error $ "Return value from " ++ s ++ " is meaningless")
 
+translateIx8 :: RegIx8 -> (RegHL8 -> Z80ASM) -> Z80ASM
+translateIx8 r act = case r of
+    IXH -> code [0xdd] *> act H
+    IXL -> code [0xdd] *> act L
+    IYH -> code [0xfd] *> act H
+    IYL -> code [0xfd] *> act L
+
 class EncodeReg8 r where
   encodeReg8 :: r -> Word8
 
@@ -826,6 +937,8 @@ instance EncodeReg8 Reg8 where
   encodeReg8 B = 0x0 -- 000
   encodeReg8 D = 0x2 -- 010
   encodeReg8 E = 0x3 -- 011
+
+instance EncodeReg8 RegHL8 where
   encodeReg8 H = 0x4 -- 100
   encodeReg8 L = 0x5 -- 101
 
